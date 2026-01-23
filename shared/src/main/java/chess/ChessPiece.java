@@ -2,7 +2,6 @@ package chess;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -71,6 +70,8 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         MovesCalculator calc = switch (this.type) {
             case BISHOP -> new BishopMovesCalculator();
+
+            case KNIGHT -> new KnightMovesCalculator();
             default -> null;
         };
 
