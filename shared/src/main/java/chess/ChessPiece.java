@@ -15,10 +15,6 @@ public class ChessPiece {
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;
 
-    private static final Map<PieceType, MovesCalculator> calculator = Map.of(
-            PieceType.BISHOP, new BishopMovesCalculator()
-
-    );
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
@@ -74,7 +70,7 @@ public interface MovesCalculator {
 public class BishopMovesCalculator implements MovesCalculator {
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-        ChessPiece bishop = board.getPiece(position);
+        ChessPiece bishop = board.getPieceType(position);
         if (bishop == null) {
             return List.of();
         }
