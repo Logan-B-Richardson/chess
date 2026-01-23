@@ -12,7 +12,7 @@ public class BishopMovesCalculator implements MovesCalculator {
             return List.of();
         }
         var moves = new ArrayList<ChessMove>();
-        int[][] directions = {{1,1},{1,-1},{-1,1},{-1,-1}};
+        int[][] directions = {{1,1}, {1,-1}, {-1,1}, {-1,-1}};
         for (int[] d : directions) {
             int r = position.getRow() + d[0];
             int c = position.getColumn() + d[1];
