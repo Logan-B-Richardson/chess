@@ -72,6 +72,9 @@ public class ChessPiece {
             case BISHOP -> new BishopMovesCalculator();
             case KING -> new KingMovesCalculator();
             case KNIGHT -> new KnightMovesCalculator();
+            case PAWN -> new PawnMovesCalculator();
+            case QUEEN -> QueenMovesCalculator();
+            //case ROOK -> RookMovesCalculator();
             default -> null;
         };
 
