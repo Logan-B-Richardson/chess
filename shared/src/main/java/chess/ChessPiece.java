@@ -70,7 +70,7 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         MovesCalculator calc = switch (this.type) {
             case BISHOP -> new BishopMovesCalculator();
-
+            case KING -> new KingMovesCalculator();
             case KNIGHT -> new KnightMovesCalculator();
             default -> null;
         };
