@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class QueenMovesCalculator implements MovesCalculator {
+public class RookMovesCalculator implements MovesCalculator {
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-        ChessPiece queen = board.getPiece(position);
-        if (queen == null) {
+        ChessPiece rook = board.getPiece(position);
+        if (rook == null) {
             return List.of();
         }
         var moves = new ArrayList<ChessMove>();
-        int[][] directions = {{1,1}, {1,-1}, {-1,1}, {-1,-1}, {1,0}, {-1,0}, {0,1}, {0,-1}};
+        int[][] directions = {{1,0}, {-1,0}, {0,1}, {0,-1}};
         for (int[] d : directions) {
             int r = position.getRow() + d[0];
             int c = position.getColumn() + d[1];
@@ -22,7 +22,7 @@ public class QueenMovesCalculator implements MovesCalculator {
                 if (space == null) {
                     moves.add(new ChessMove(position, end, null));
                 } else {
-                    if (space.getTeamColor() != queen.getTeamColor()) {
+                    if (space.getTeamColor() != rook.getTeamColor()) {
                         moves.add(new ChessMove(position, end, null)); // capture
                     }
                     break;
