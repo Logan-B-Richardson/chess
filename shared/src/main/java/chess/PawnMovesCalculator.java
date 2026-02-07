@@ -38,6 +38,19 @@ public class PawnMovesCalculator implements MovesCalculator {
                 pawnPromotion(moves, position, diagonal, promotionRow);
             }
         }
+        if (enPassantTarget != null) {
+            int targetRow = enPassantTarget.getRow();
+            int targetCol = enPassantTarget.getColumn();
+
+            if (targetRow == start.getRow() + dir &&
+                    Math.abs(targetCol - start.getColumn()) == 1) {
+
+                ChessPosition capturedPos = new ChessPosition(start.getRow(), targetCol);
+                ChessPiece captured = board.getPiece(capturedPos);
+
+                if ((captured != null) && (captured.getPieceType() == ChessPiece.PieceType.PAWN) && (captured.getTeamColor() != myColor) && (board.getPiece(enPassantTarget) == null)) moves.add(new ChessMove(start, enPassantTarget, null));
+            }
+        }
         return moves;
     }
     private boolean inBounds(int r, int c) {
