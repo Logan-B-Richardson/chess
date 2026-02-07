@@ -11,11 +11,12 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessGame {
-
     private ChessBoard board = new ChessBoard();
     private TeamColor turn = TeamColor.WHITE;
 
-    public ChessGame() {}
+    public ChessGame() {
+        board.resetBoard();
+    }
 
     /**
      * @return Which team's turn it is
@@ -170,7 +171,7 @@ public class ChessGame {
         ChessPiece moving = toboard.getPiece(start);
         toboard.addPiece(start, null);
         ChessPiece place = moving;
-        if ((moving != null) && (moving.getPieceType() == ChessPiece.PieceType.PAWN) && (end.getRow() == 1 || end.getRow() == 0) && (move.getPromotionPiece() != null)) {
+        if ((moving != null) && (moving.getPieceType() == ChessPiece.PieceType.PAWN) && (end.getRow() == 1 || end.getRow() == 8) && (move.getPromotionPiece() != null)) {
             place = new ChessPiece(moving.getTeamColor(), move.getPromotionPiece());
         }
         toboard.addPiece(end, place);
