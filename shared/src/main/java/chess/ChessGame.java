@@ -165,6 +165,18 @@ public class ChessGame {
         return copy;
     }
 
+    private void applyMove(ChessBoard toboard, ChessMove move) {
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+        ChessPiece moving = toboard.getPiece(start);
+        toboard.addPiece(start, null);
+        ChessPiece place = moving;
+        if ((moving != null) && (moving.getPieceType() == ChessPiece.PieceType.PAWN) && (end.getRow() == 1 || end.getRow() == 8) && (move.getPromotionPiece() != null)) {
+            place = new ChessPiece(moving.getTeamColor(), move.getPromotionPiece());
+        }
+        toboard.addPiece(end, place);
+    }
+
 
 
     @Override
