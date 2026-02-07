@@ -165,45 +165,7 @@ public class ChessGame {
         return copy;
     }
 
-    private void applyMove(ChessBoard toboard, ChessMove move) {
-        ChessPosition start = move.getStartPosition();
-        ChessPosition end = move.getEndPosition();
-        ChessPiece moving = toboard.getPiece(start);
-        toboard.addPiece(start, null);
-        ChessPiece place = moving;
-        if ((moving != null) && (moving.getPieceType() == ChessPiece.PieceType.PAWN) && (end.getRow() == 1 || end.getRow() == 8) && (move.getPromotionPiece() != null)) {
-            place = new ChessPiece(moving.getTeamColor(), move.getPromotionPiece());
-        }
-        toboard.addPiece(end, place);
-    }
 
-    private boolean check(TeamColor teamColor, ChessBoard toboard) {
-        ChessPosition kingpos = findKingPosition(teamColor, toboard);
-        if (kingpos == null) return true;
-        TeamColor op = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
-        for (int r = 1; r <= 8; r++) {
-            for (int c = 1; c <= 8; c++) {
-                ChessPosition from = new ChessPosition(r, c);
-                ChessPiece piece = toboard.getPiece(from);
-                if ((piece == null) || piece.getTeamColor() != op) continue;
-                for (ChessMove m: piece.pieceMoves(toboard, from)) {
-                    if (kingpos.equals(m.getEndPosition())) return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private ChessPosition findKingPosition(TeamColor teamColor, ChessBoard toboard) {
-        for (int r = 1; r <= 8; r++) {
-            for (int c = 1; c <= 8; c++) {
-                ChessPosition pos = new ChessPosition(r, c);
-                ChessPiece piece = toboard.getPiece(pos);
-                if ((piece != null) && (piece.getTeamColor() == teamColor) && (piece.getPieceType() == ChessPiece.PieceType.KING)) return pos;
-            }
-        }
-        return null;
-    }
 
     @Override
     public boolean equals(Object o) {
