@@ -194,7 +194,16 @@ public class ChessGame {
         return false;
     }
 
-
+    private ChessPosition findKingPosition(TeamColor teamColor, ChessBoard toboard) {
+        for (int r = 1; r <= 8; r++) {
+            for (int c = 1; c <= 8; c++) {
+                ChessPosition pos = new ChessPosition(r, c);
+                ChessPiece piece = toboard.getPiece(pos);
+                if ((piece != null) && (piece.getTeamColor() == teamColor) && (piece.getPieceType() == ChessPiece.PieceType.KING)) return pos;
+            }
+        }
+        return null;
+    }
 
     @Override
     public boolean equals(Object o) {
