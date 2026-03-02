@@ -1,7 +1,6 @@
 package dataaccess;
 
 import model.*;
-import org.eclipse.jetty.server.Authentication;
 
 import java.util.Collection;
 
