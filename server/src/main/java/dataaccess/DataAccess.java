@@ -13,7 +13,7 @@ public interface DataAccess {
     // AuthData interface
     AuthData getAuth(String authToken);
     void createAuth(AuthData token);
-    void deleteAuth(AuthData token);
+    void deleteAuth(String token);
 
     // GameData interface
     int createGame(String gamename);
