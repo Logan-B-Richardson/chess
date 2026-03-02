@@ -1,6 +1,7 @@
 package server;
 
 import io.javalin.*;
+import com.google.gson.Gson;
 
 public class Server {
 
