@@ -11,7 +11,6 @@ public class Server {
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
-        Data
     }
 
     public int run(int desiredPort) {
