@@ -5,20 +5,21 @@ import io.javalin.http.Context;
 import service.GameService;
 import service.CreateGameRequest;
 import service.CreateGameResult;
+import service.JoinGameRequest;
 
-public class CreateGameHandler {
+public class JoinGameHandler {
     private final GameService service;
     private final Gson gson;
 
-    public CreateGameHandler(GameService service, Gson gson) {
+    public JoinGameHandler(GameService service, Gson gson) {
         this.service = service;
         this.gson = gson;
     }
 
     public void handle(Context context) {
         String token = context.header("authorization");
-        CreateGameRequest request = gson.fromJson(context.body(), CreateGameRequest.class);
-        CreateGameResult result = service.createGame(token, request);
-        context.status(200).result(gson.toJson(result));
+        JoinGameRequest request = gson.fromJson(context.body(), JoinGameRequest.class);
+        service.joinGame(token, request);
+        context.status(200).result("{}");
     }
 }
