@@ -3,6 +3,7 @@ package handler;
 import com.google.gson.Gson;
 import io.javalin.http.Context;
 import service.*;
+import service.records.LoginRequest;
 
 public class LoginHandler {
     private final UserService service;

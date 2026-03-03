@@ -6,6 +6,10 @@ import model.UserData;
 import service.exceptions.AlreadyTakenException;
 import service.exceptions.BadRequestException;
 import service.exceptions.UnauthorizedException;
+import service.records.LoginRequest;
+import service.records.LoginResult;
+import service.records.RegisterRequest;
+import service.records.RegisterResult;
 
 import java.util.UUID;
 

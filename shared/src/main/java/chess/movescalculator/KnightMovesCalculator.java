@@ -1,31 +1,32 @@
-package chess;
+package chess.movescalculator;
+
+import chess.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class RookMovesCalculator implements MovesCalculator {
+public class KnightMovesCalculator implements MovesCalculator {
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-        ChessPiece rook = board.getPiece(position);
-        if (rook == null) {
+        ChessPiece knight = board.getPiece(position);
+        if (knight == null) {
             return List.of();
         }
         var moves = new ArrayList<ChessMove>();
-        int[][] directions = {{1,0}, {-1,0}, {0,1}, {0,-1}};
+        int[][] directions = {{2,1}, {2,-1}, {-2,1}, {-2,-1}, {1,2}, {1,-2}, {-1,2}, {-1,-2}};
         for (int[] d : directions) {
             int r = position.getRow() + d[0];
             int c = position.getColumn() + d[1];
-            while (inBounds(r, c)) {
-                ChessPosition end = new ChessPosition(r,c);
+            if (inBounds(r, c)) {
+                ChessPosition end = new ChessPosition(r, c);
                 ChessPiece space = board.getPiece(end);
-                if (space == null) {
+                if (space == null || space.getTeamColor() != knight.getTeamColor()) {
                     moves.add(new ChessMove(position, end, null));
                 } else {
-                    if (space.getTeamColor() != rook.getTeamColor()) {
+                    if (space.getTeamColor() != knight.getTeamColor()) {
                         moves.add(new ChessMove(position, end, null)); // capture
                     }
-                    break;
                 }
                 r += d[0];
                 c += d[1];

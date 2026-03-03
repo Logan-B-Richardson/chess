@@ -1,4 +1,4 @@
-package service;
+package passoff.server;
 
 import dataaccess.DataAccess;
 import dataaccess.DataAccessMemory;
@@ -6,7 +6,14 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
+import service.GameService;
+import service.UserService;
 import service.exceptions.*;
+import service.records.CreateGameRequest;
+import service.records.JoinGameRequest;
+import service.records.LoginRequest;
+import service.records.RegisterRequest;
+
 import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -1,30 +1,33 @@
-package chess;
+package chess.movescalculator;
+
+import chess.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class KingMovesCalculator implements MovesCalculator {
+public class QueenMovesCalculator implements MovesCalculator {
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-        ChessPiece king = board.getPiece(position);
-        if (king == null) {
+        ChessPiece queen = board.getPiece(position);
+        if (queen == null) {
             return List.of();
         }
         var moves = new ArrayList<ChessMove>();
-        int[][] directions = {{-1, 1}, {0,1}, {1,1}, {1,0}, {-1,0}, {1,-1}, {0,-1}, {-1,-1}};
+        int[][] directions = {{1,1}, {1,-1}, {-1,1}, {-1,-1}, {1,0}, {-1,0}, {0,1}, {0,-1}};
         for (int[] d : directions) {
             int r = position.getRow() + d[0];
             int c = position.getColumn() + d[1];
-            if (inBounds(r, c)) {
-                ChessPosition end = new ChessPosition(r, c);
+            while (inBounds(r, c)) {
+                ChessPosition end = new ChessPosition(r,c);
                 ChessPiece space = board.getPiece(end);
-                if (space == null || space.getTeamColor() != king.getTeamColor()) {
+                if (space == null) {
                     moves.add(new ChessMove(position, end, null));
                 } else {
-                    if (space.getTeamColor() != king.getTeamColor()) {
+                    if (space.getTeamColor() != queen.getTeamColor()) {
                         moves.add(new ChessMove(position, end, null)); // capture
                     }
+                    break;
                 }
                 r += d[0];
                 c += d[1];

@@ -3,9 +3,7 @@ package handler;
 import com.google.gson.Gson;
 import io.javalin.http.Context;
 import service.GameService;
-import service.CreateGameRequest;
-import service.CreateGameResult;
-import service.JoinGameRequest;
+import service.records.JoinGameRequest;
 
 public class JoinGameHandler {
     private final GameService service;
