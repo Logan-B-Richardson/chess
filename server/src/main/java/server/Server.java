@@ -6,6 +6,10 @@ import com.google.gson.Gson;
 import dataaccess.*;
 import handler.*;
 import service.*;
+import service.exceptions.AlreadyTakenException;
+import service.exceptions.BadRequestException;
+import service.exceptions.ForbiddenException;
+import service.exceptions.UnauthorizedException;
 
 import java.util.Map;
 

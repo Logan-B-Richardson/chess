@@ -3,6 +3,10 @@ package service;
 import dataaccess.DataAccess;
 import model.AuthData;
 import model.UserData;
+import service.exceptions.AlreadyTakenException;
+import service.exceptions.BadRequestException;
+import service.exceptions.UnauthorizedException;
+
 import java.util.UUID;
 
 public class UserService {

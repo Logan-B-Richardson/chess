@@ -3,6 +3,9 @@ package service;
 import dataaccess.DataAccess;
 import model.AuthData;
 import model.GameData;
+import service.exceptions.BadRequestException;
+import service.exceptions.ForbiddenException;
+import service.exceptions.UnauthorizedException;
 
 import java.util.List;
 

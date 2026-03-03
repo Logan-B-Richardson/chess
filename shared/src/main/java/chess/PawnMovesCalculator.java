@@ -31,7 +31,9 @@ public class PawnMovesCalculator implements MovesCalculator {
         int[] captureCols = {c - 1, c + 1};
         for (int cc : captureCols) {
             int rr = r + direction;
-            if (!inBounds(rr, cc)) continue;
+            if (!inBounds(rr, cc)) {
+                continue;
+            }
             ChessPosition diagonal = new ChessPosition(rr, cc);
             ChessPiece target = board.getPiece(diagonal);
             if (target != null && target.getTeamColor() != pawn.getTeamColor()) {

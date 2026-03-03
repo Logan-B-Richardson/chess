@@ -78,7 +78,9 @@ public class ChessPiece {
             default -> null;
         };
 
-        if (calc == null) return List.of();
+        if (calc == null) {
+            return List.of();
+        }
         return calc.pieceMoves(board, myPosition);
     }
 }
