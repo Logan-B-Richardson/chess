@@ -25,7 +25,7 @@ public class ServiceTests {
     }
 
     @Test
-    void register_positive() {
+    void registerPositive() {
         var result = userService.register(
                 new RegisterRequest("logan", "pw", "l@mail.com"));
         assertNotNull(result.authToken());
@@ -34,14 +34,14 @@ public class ServiceTests {
     }
 
     @Test
-    void register_negative_duplicate() {
+    void registerNegativeDuplicate() {
         userService.register(new RegisterRequest("dup", "pw", "d@mail.com"));
         assertThrows(AlreadyTakenException.class, () ->
                 userService.register(new RegisterRequest("dup", "pw", "d@mail.com")));
     }
 
     @Test
-    void login_positive() {
+    void loginPositive() {
         userService.register(new RegisterRequest("bob", "pw", "b@mail.com"));
         var result = userService.login(new LoginRequest("bob", "pw"));
         assertNotNull(result.authToken());
@@ -49,26 +49,26 @@ public class ServiceTests {
     }
 
     @Test
-    void login_negative_wrongPassword() {
+    void loginNegativeWrongPassword() {
         userService.register(new RegisterRequest("bob", "pw", "b@mail.com"));
         assertThrows(UnauthorizedException.class, () ->
                 userService.login(new LoginRequest("bob", "pa")));
     }
 
     @Test
-    void logout_positive() {
+    void logoutPositive() {
         userService.logout(authToken);
         assertNull(dao.getAuth(authToken));
     }
 
     @Test
-    void logout_negative_invalidToken() {
+    void logoutNegativeInvalidToken() {
         assertThrows(UnauthorizedException.class, () ->
                 userService.logout("token"));
     }
 
     @Test
-    void createGame_positive() {
+    void createGamePositive() {
         var result = gameService.createGame(
                 authToken,
                 new CreateGameRequest("mygame"));
@@ -76,14 +76,14 @@ public class ServiceTests {
     }
 
     @Test
-    void createGame_negative_unauthorized() {
+    void createGameNegativeUnauthorized() {
         assertThrows(UnauthorizedException.class, () ->
                 gameService.createGame("badtoken",
                         new CreateGameRequest("mygame")));
     }
 
     @Test
-    void listGames_positive() {
+    void listGamesPositive() {
         gameService.createGame(authToken,
                 new CreateGameRequest("g1"));
         var result = gameService.listGames(authToken);
@@ -92,13 +92,13 @@ public class ServiceTests {
     }
 
     @Test
-    void listGames_negative_unauthorized() {
+    void listGamesNegativeUnauthorized() {
         assertThrows(UnauthorizedException.class, () ->
                 gameService.listGames("badtoken"));
     }
 
     @Test
-    void joinGame_positive() {
+    void joinGamePositive() {
         int gid = gameService
                 .createGame(authToken,
                         new CreateGameRequest("g"))
@@ -110,7 +110,7 @@ public class ServiceTests {
     }
 
     @Test
-    void joinGame_negative_colorTaken() {
+    void joinGameNegativeColorTaken() {
         int gid = gameService
                 .createGame(authToken,
                         new CreateGameRequest("g"))
