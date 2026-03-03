@@ -7,9 +7,7 @@ import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import service.exceptions.*;
-
 import java.util.Collection;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ServiceTests {
