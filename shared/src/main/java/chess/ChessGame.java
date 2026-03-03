@@ -50,9 +50,13 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        if (startPosition == null) return null;
+        if (startPosition == null) {
+            return null;
+        }
         ChessPiece piece = board.getPiece(startPosition);
-        if (piece == null) return null;
+        if (piece == null) {
+            return null;
+        }
         Collection<ChessMove> possible = piece.pieceMoves(board, startPosition);
         var legal = new ArrayList<ChessMove>();
         for (ChessMove move : possible) {
@@ -72,12 +76,20 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        if (move == null) throw new InvalidMoveException("Move is null");
+        if (move == null) {
+            throw new InvalidMoveException("Move is null");
+        }
         ChessPiece piece = board.getPiece(move.getStartPosition());
-        if (piece == null) throw new InvalidMoveException("No piece");
-        if (piece.getTeamColor() != turn) throw new InvalidMoveException("Wrong team");
+        if (piece == null) {
+            throw new InvalidMoveException("No piece");
+        }
+        if (piece.getTeamColor() != turn) {
+            throw new InvalidMoveException("Wrong team");
+        }
         Collection<ChessMove> legal = validMoves(move.getStartPosition());
-        if (legal == null || !legal.contains(move)) throw new InvalidMoveException("Illegal move");
+        if (legal == null || !legal.contains(move)) {
+            throw new InvalidMoveException("Illegal move");
+        }
         applyMove(this.board, move);
         this.turn = (this.turn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
     }
@@ -104,9 +116,13 @@ public class ChessGame {
             for (int c = 1; c <= 8; c++) {
                 ChessPosition pos = new ChessPosition(r,c);
                 ChessPiece piece = board.getPiece(pos);
-                if ((piece == null) || piece.getTeamColor() != teamColor) continue;
+                if ((piece == null) || piece.getTeamColor() != teamColor) {
+                    continue;
+                }
                 Collection<ChessMove> moves = validMoves(pos);
-                if ((moves != null) && (!moves.isEmpty())) return false;
+                if ((moves != null) && (!moves.isEmpty())) {
+                    return false;
+                }
             }
         }
         return true;
@@ -120,7 +136,9 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        if (isInCheck(teamColor)) return false;
+        if (isInCheck(teamColor)) {
+            return false;
+        }
         for (int r = 1; r <= 8; r++) {
             for (int c = 1; c <= 8; c++) {
                 ChessPosition pos = new ChessPosition(r, c);
@@ -129,7 +147,9 @@ public class ChessGame {
                     continue;
                 }
                 Collection<ChessMove> moves = validMoves(pos);
-                if (moves != null && !moves.isEmpty()) return false;
+                if (moves != null && !moves.isEmpty()) {
+                    return false;
+                }
             }
         }
         return true;
@@ -159,7 +179,9 @@ public class ChessGame {
             for (int c = 1; c <= 8; c++) {
                 ChessPosition pos = new ChessPosition(r, c);
                 ChessPiece p = og.getPiece(pos);
-                if (p != null) copy.addPiece(pos, p);
+                if (p != null) {
+                    copy.addPiece(pos, p);
+                }
             }
         }
         return copy;
