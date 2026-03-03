@@ -40,14 +40,14 @@ public class ServiceTests {
     }
 
     @Test
-    void register_negative_duplicateUsername_throws() {
+    void registerNegativeDuplicateUsernameThrows() {
         userService.register(new RegisterRequest("bob", "pw", "bob@mail.com"));
         assertThrows(AlreadyTakenException.class,
                 () -> userService.register(new RegisterRequest("bob", "pw2", "bob2@mail.com")));
     }
 
     @Test
-    void login_positive_returnsTokenAndStoresAuth() {
+    void login_positiveReturnsTokenAndStoresAuth() {
         userService.register(new RegisterRequest("alice", "pw", "alice@mail.com"));
         var result = userService.login(new LoginRequest("alice", "pw"));
         assertEquals("alice", result.username());
@@ -56,26 +56,26 @@ public class ServiceTests {
     }
 
     @Test
-    void login_negative_wrongPassword_throws() {
+    void loginNegativeWrongPasswordThrows() {
         userService.register(new RegisterRequest("alice", "pw", "alice@mail.com"));
         assertThrows(UnauthorizedException.class,
                 () -> userService.login(new LoginRequest("alice", "BADPW")));
     }
 
     @Test
-    void logout_positive_deletesAuth() {
+    void logoutPositiveDeletesAuth() {
         String token = seedUserAndLogin("carl");
         userService.logout(token);
         assertNull(dao.getAuth(token));
     }
 
     @Test
-    void logout_negative_invalidToken_throws() {
+    void logoutNegativeInvalidTokenThrows() {
         assertThrows(UnauthorizedException.class, () -> userService.logout("not-a-real-token"));
     }
 
     @Test
-    void listGames_positive_returnsGames() {
+    void listGamesPositiveReturnsGames() {
         String token = seedUserAndLogin("dana");
         gameService.createGame(token, new CreateGameRequest("g1"));
         gameService.createGame(token, new CreateGameRequest("g2"));
@@ -85,12 +85,12 @@ public class ServiceTests {
     }
 
     @Test
-    void listGames_negative_unauthorized_throws() {
+    void listGamesNegativeUnauthorizedThrows() {
         assertThrows(UnauthorizedException.class, () -> gameService.listGames("bad-token"));
     }
 
     @Test
-    void createGame_positive_storesGame() {
+    void createGamePositiveStoresGame() {
         String token = seedUserAndLogin("erin");
         var result = gameService.createGame(token, new CreateGameRequest("my game"));
         assertTrue(result.gameID() > 0);
@@ -98,13 +98,13 @@ public class ServiceTests {
     }
 
     @Test
-    void createGame_negative_nullName_throws() {
+    void createGameNegativeNullNameThrows() {
         String token = seedUserAndLogin("erin");
         assertThrows(BadRequestException.class, () -> gameService.createGame(token, new CreateGameRequest(null)));
     }
 
     @Test
-    void joinGame_positive_claimsWhiteSpot() {
+    void joinGamePositiveClaimsWhiteSpot() {
         String token = seedUserAndLogin("frank");
         int gameId = gameService.createGame(token, new CreateGameRequest("joinable")).gameID();
         gameService.joinGame(token, new JoinGameRequest("WHITE", gameId));
@@ -113,7 +113,7 @@ public class ServiceTests {
     }
 
     @Test
-    void joinGame_negative_whiteAlreadyTaken_throws() {
+    void joinGameCegativeWhiteAlreadyTakenThrows() {
         String token1 = seedUserAndLogin("g1");
         String token2 = seedUserAndLogin("g2");
         int gameId = gameService.createGame(token1, new CreateGameRequest("full soon")).gameID();
