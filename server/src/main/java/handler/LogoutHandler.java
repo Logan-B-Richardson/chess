@@ -11,8 +11,7 @@ public class LogoutHandler {
     }
 
     public void handle(Context context) {
-        String token = context.header("authorization");
-        service.logout(token);
+        service.logout(context.header("authorization"));
         context.status(200).result("{}");
     }
 }
