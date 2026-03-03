@@ -40,18 +40,18 @@ public class GameService {
 
     public void joinGame(String token, JoinGameRequest request) {
         if (request == null ||
-                request.gameid() == 0 ||
-                request.playercolor() == null) {
+                request.gameID() == 0 ||
+                request.playerColor() == null) {
             throw new BadRequestException("bad request");
         }
-        GameData game = dao.getGame(request.gameid());
+        GameData game = dao.getGame(request.gameID());
         if (game == null) {
             throw new BadRequestException("bad request");
         }
         if (token == null || dao.getAuth(token) == null) {
             throw new UnauthorizedException("unauthorized");
         }
-        String color = request.playercolor();
+        String color = request.playerColor();
         if (!color.equals("WHITE") && !color.equals("BLACK")) {
             throw new BadRequestException("bad request");
         }
