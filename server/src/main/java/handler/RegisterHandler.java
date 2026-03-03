@@ -15,9 +15,9 @@ public class RegisterHandler {
         this.gson = gson;
     }
 
-    public void handle(Context ctx) {
-        RegisterRequest req = gson.fromJson(ctx.body(), RegisterRequest.class);
-        RegisterResult res = service.register(req);
-        ctx.status(200).result(gson.toJson(res));
+    public void handle(Context context) {
+        RegisterRequest request = gson.fromJson(context.body(), RegisterRequest.class);
+        RegisterResult result = service.register(request);
+        context.status(200).result(gson.toJson(result));
     }
 }
