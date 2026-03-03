@@ -28,13 +28,13 @@ public class GameService {
     }
 
     public CreateGameResult createGame(String token, CreateGameRequest request) {
-        if (request == null || request.gamename() == null) {
+        if (request == null || request.gameName() == null) {
             throw new BadRequestException("bad request");
         }
         if (token == null || dao.getAuth(token) == null) {
             throw new UnauthorizedException("unauthorized");
         }
-        int id = dao.createGame(request.gamename());
+        int id = dao.createGame(request.gameName());
         return new CreateGameResult(id);
     }
 
