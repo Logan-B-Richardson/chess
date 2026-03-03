@@ -41,4 +41,10 @@ public class UserService {
         dao.createAuth(new AuthData(token, register.username()));
         return new LoginResult(register.username(), token);
     }
+
+    public void logout(String token) {
+        if (token == null || dao.getAuth(token) == null) {
+            throw new UnauthorizedException("unauthorized");
+        }
+    }
 }
