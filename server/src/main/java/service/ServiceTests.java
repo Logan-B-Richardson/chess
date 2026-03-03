@@ -1,187 +1,124 @@
 package service;
 
 import dataaccess.DataAccess;
+import dataaccess.DataAccessMemory;
 import model.AuthData;
-import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import service.exceptions.*;
-import java.util.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ServiceTests {
     private DataAccess dao;
     private UserService userService;
     private GameService gameService;
-    private String authToken;
 
     @BeforeEach
     void setup() {
-        dao = new InMemoryDataAccess();
+        dao = new DataAccessMemory();
         userService = new UserService(dao);
         gameService = new GameService(dao);
-        var reg = userService.register(new RegisterRequest("user", "pw", "u@mail.com"));
-        authToken = reg.authToken();
+    }
+
+    private String seedUserAndLogin(String username) {
+        userService.register(new RegisterRequest(username, "pw", username + "@mail.com"));
+        var login = userService.login(new LoginRequest(username, "pw"));
+        assertNotNull(login.authToken());
+        assertNotNull(dao.getAuth(login.authToken()));
+        return login.authToken();
     }
 
     @Test
-    void registerPositive() {
-        var result = userService.register(
-                new RegisterRequest("logan", "pw", "l@mail.com"));
-        assertNotNull(result.authToken());
-        assertEquals("logan", result.username());
-        assertNotNull(dao.getUser("logan"));
-    }
-
-    @Test
-    void registerNegativeDuplicate() {
-        userService.register(new RegisterRequest("dup", "pw", "d@mail.com"));
-        assertThrows(AlreadyTakenException.class, () ->
-                userService.register(new RegisterRequest("dup", "pw", "d@mail.com")));
-    }
-
-    @Test
-    void loginPositive() {
-        userService.register(new RegisterRequest("bob", "pw", "b@mail.com"));
-        var result = userService.login(new LoginRequest("bob", "pw"));
-        assertNotNull(result.authToken());
+    void registerPositiveCreatesUser() {
+        var result = userService.register(new RegisterRequest("bob", "pw", "bob@mail.com"));
         assertEquals("bob", result.username());
+        assertNotNull(result.authToken());
+        UserData stored = dao.getUser("bob");
+        assertNotNull(stored);
+        assertEquals("bob", stored.username());
     }
 
     @Test
-    void loginNegativeWrongPassword() {
-        userService.register(new RegisterRequest("bob", "pw", "b@mail.com"));
-        assertThrows(UnauthorizedException.class, () ->
-                userService.login(new LoginRequest("bob", "pa")));
+    void register_negative_duplicateUsername_throws() {
+        userService.register(new RegisterRequest("bob", "pw", "bob@mail.com"));
+        assertThrows(AlreadyTakenException.class,
+                () -> userService.register(new RegisterRequest("bob", "pw2", "bob2@mail.com")));
     }
 
     @Test
-    void logoutPositive() {
-        userService.logout(authToken);
-        assertNull(dao.getAuth(authToken));
+    void login_positive_returnsTokenAndStoresAuth() {
+        userService.register(new RegisterRequest("alice", "pw", "alice@mail.com"));
+        var result = userService.login(new LoginRequest("alice", "pw"));
+        assertEquals("alice", result.username());
+        assertNotNull(result.authToken());
+        assertNotNull(dao.getAuth(result.authToken()));
     }
 
     @Test
-    void logoutNegativeInvalidToken() {
-        assertThrows(UnauthorizedException.class, () ->
-                userService.logout("token"));
+    void login_negative_wrongPassword_throws() {
+        userService.register(new RegisterRequest("alice", "pw", "alice@mail.com"));
+        assertThrows(UnauthorizedException.class,
+                () -> userService.login(new LoginRequest("alice", "BADPW")));
     }
 
     @Test
-    void createGamePositive() {
-        var result = gameService.createGame(
-                authToken,
-                new CreateGameRequest("mygame"));
-         assertNotNull(dao.getGame(result.gameID()));
+    void logout_positive_deletesAuth() {
+        String token = seedUserAndLogin("carl");
+        userService.logout(token);
+        assertNull(dao.getAuth(token));
     }
 
     @Test
-    void createGameNegativeUnauthorized() {
-        assertThrows(UnauthorizedException.class, () ->
-                gameService.createGame("badtoken",
-                        new CreateGameRequest("mygame")));
+    void logout_negative_invalidToken_throws() {
+        assertThrows(UnauthorizedException.class, () -> userService.logout("not-a-real-token"));
     }
 
     @Test
-    void listGamesPositive() {
-        gameService.createGame(authToken,
-                new CreateGameRequest("g1"));
-        var result = gameService.listGames(authToken);
-        assertNotNull(result.games());
-        assertFalse(result.games().isEmpty());
+    void listGames_positive_returnsGames() {
+        String token = seedUserAndLogin("dana");
+        gameService.createGame(token, new CreateGameRequest("g1"));
+        gameService.createGame(token, new CreateGameRequest("g2"));
+        var results = gameService.listGames(token);
+        assertNotNull(results.games());
+        assertEquals(2, results.games().size());
     }
 
     @Test
-    void listGamesNegativeUnauthorized() {
-        assertThrows(UnauthorizedException.class, () ->
-                gameService.listGames("badtoken"));
+    void listGames_negative_unauthorized_throws() {
+        assertThrows(UnauthorizedException.class, () -> gameService.listGames("bad-token"));
     }
 
     @Test
-    void joinGamePositive() {
-        int gid = gameService
-                .createGame(authToken,
-                        new CreateGameRequest("g"))
-                .gameID();
-        gameService.joinGame(authToken,
-                new JoinGameRequest("WHITE", gid));
-        var game = dao.getGame(gid);
-        assertEquals("user", game.whiteusername());
+    void createGame_positive_storesGame() {
+        String token = seedUserAndLogin("erin");
+        var result = gameService.createGame(token, new CreateGameRequest("my game"));
+        assertTrue(result.gameID() > 0);
+        assertNotNull(dao.getGame(result.gameID())); // game exists in DAO
     }
 
     @Test
-    void joinGameNegativeColorTaken() {
-        int gid = gameService
-                .createGame(authToken,
-                        new CreateGameRequest("g"))
-                .gameID();
-        gameService.joinGame(authToken,
-                new JoinGameRequest("WHITE", gid));
-        var reg2 = userService.register(
-                new RegisterRequest("user2", "pw", "u2@mail.com"));
-        assertThrows(ForbiddenException.class, () ->
-                gameService.joinGame(reg2.authToken(),
-                        new JoinGameRequest("WHITE", gid)));
+    void createGame_negative_nullName_throws() {
+        String token = seedUserAndLogin("erin");
+        assertThrows(BadRequestException.class, () -> gameService.createGame(token, new CreateGameRequest(null)));
     }
 
-    static class InMemoryDataAccess implements DataAccess {
+    @Test
+    void joinGame_positive_claimsWhiteSpot() {
+        String token = seedUserAndLogin("frank");
+        int gameId = gameService.createGame(token, new CreateGameRequest("joinable")).gameID();
+        gameService.joinGame(token, new JoinGameRequest("WHITE", gameId));
+        var stored = dao.getGame(gameId);
+        assertEquals("frank", stored.whiteusername());
+    }
 
-        private final Map<String, UserData> users = new HashMap<>();
-        private final Map<String, AuthData> auths = new HashMap<>();
-        private final Map<Integer, GameData> games = new HashMap<>();
-        private int nextId = 1;
-
-        @Override
-        public UserData getUser(String username) {
-            return users.get(username);
-        }
-
-        @Override
-        public void createUser(UserData user) {
-            users.put(user.username(), user);
-        }
-
-        @Override
-        public AuthData getAuth(String token) {
-            return auths.get(token);
-        }
-
-        @Override
-        public void createAuth(AuthData token) {
-            auths.put(token.authToken(), token);
-        }
-
-        @Override
-        public void deleteAuth(String token) {
-            auths.remove(token);
-        }
-
-        @Override
-        public int createGame(String gamename) {
-            int id = nextId++;
-            GameData game = new GameData(id, null, null, gamename, null);
-            games.put(id, game);
-            return id;
-        }
-
-        @Override
-        public GameData getGame(int gameid) {
-            return games.get(gameid);
-        }
-
-        @Override
-        public Collection<GameData> listGames() {
-            return games.values();
-        }
-
-        @Override
-        public void updateGame(GameData game) {
-            games.put(game.gameid(), game);
-        }
-
-        @Override
-        public void clear() {
-
-        }
+    @Test
+    void joinGame_negative_whiteAlreadyTaken_throws() {
+        String token1 = seedUserAndLogin("g1");
+        String token2 = seedUserAndLogin("g2");
+        int gameId = gameService.createGame(token1, new CreateGameRequest("full soon")).gameID();
+        gameService.joinGame(token1, new JoinGameRequest("WHITE", gameId));
+        assertThrows(ForbiddenException.class,
+                () -> gameService.joinGame(token2, new JoinGameRequest("WHITE", gameId)));
     }
 }
