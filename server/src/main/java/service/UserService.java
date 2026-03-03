@@ -12,34 +12,34 @@ public class UserService {
         this.dao = dao;
     }
 
-    public RegisterResult register(RegisterRequest register) {
-        if (register == null ||
-                register.username() == null ||
-                register.password() == null ||
-                register.email() == null) {
+    public RegisterResult register(RegisterRequest request) {
+        if (request == null ||
+                request.username() == null ||
+                request.password() == null ||
+                request.email() == null) {
             throw new BadRequestException("bad request");
         }
-        if (dao.getUser(register.username()) != null) {
+        if (dao.getUser(request.username()) != null) {
             throw new AlreadyTakenException("username taken");
         }
-        dao.createUser(new UserData(register.username(), register.password(), register.email()));
+        dao.createUser(new UserData(request.username(), request.password(), request.email()));
         String token = UUID.randomUUID().toString();
-        return new RegisterResult(register.username(), token);
+        return new RegisterResult(request.username(), token);
     }
 
-    public LoginResult login(LoginRequest register) {
-        if (register == null ||
-                register.username() == null ||
-                register.password() == null) {
+    public LoginResult login(LoginRequest request) {
+        if (request == null ||
+                request.username() == null ||
+                request.password() == null) {
             throw new BadRequestException("bad request");
         }
-        UserData user = dao.getUser(register.username());
-        if (user == null || !user.password().equals(register.password())) {
+        UserData user = dao.getUser(request.username());
+        if (user == null || !user.password().equals(request.password())) {
             throw new UnauthorizedException("wrong password");
         }
         String token = UUID.randomUUID().toString();
-        dao.createAuth(new AuthData(token, register.username()));
-        return new LoginResult(register.username(), token);
+        dao.createAuth(new AuthData(token, request.username()));
+        return new LoginResult(request.username(), token);
     }
 
     public void logout(String token) {
