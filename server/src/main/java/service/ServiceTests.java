@@ -3,9 +3,12 @@ package service;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessMemory;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import service.exceptions.*;
+
+import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -47,7 +50,7 @@ public class ServiceTests {
     }
 
     @Test
-    void login_positiveReturnsTokenAndStoresAuth() {
+    void loginPositiveReturnsTokenAndStoresAuth() {
         userService.register(new RegisterRequest("alice", "pw", "alice@mail.com"));
         var result = userService.login(new LoginRequest("alice", "pw"));
         assertEquals("alice", result.username());
@@ -120,5 +123,82 @@ public class ServiceTests {
         gameService.joinGame(token1, new JoinGameRequest("WHITE", gameId));
         assertThrows(ForbiddenException.class,
                 () -> gameService.joinGame(token2, new JoinGameRequest("WHITE", gameId)));
+    }
+
+    @Test
+    void createUserPositiveThenGetUserReturnsUser() {
+        var user = new UserData("alice", "pwHashOrPw", "alice@mail.com");
+        dao.createUser(user);
+        UserData stored = dao.getUser("alice");
+        assertNotNull(stored);
+        assertEquals("alice", stored.username());
+        assertEquals("alice@mail.com", stored.email());
+    }
+
+    @Test
+    void getUserNegativeMissingUserReturnsNull() {
+        assertNull(dao.getUser("does-not-exist"));
+    }
+
+    @Test
+    void createAuthPositiveThenGetAuthReturnsToken() {
+        var auth = new AuthData("token123", "alice");
+        dao.createAuth(auth);
+        AuthData stored = dao.getAuth("token123");
+        assertNotNull(stored);
+        assertEquals("token123", stored.authToken());
+        assertEquals("alice", stored.username());
+    }
+
+    @Test
+    void getAuthNegativeMissingTokenReturnsNull() {
+        assertNull(dao.getAuth("nope"));
+    }
+
+    @Test
+    void deleteAuthPositiveRemovesToken() {
+        dao.createAuth(new AuthData("token123", "alice"));
+        assertNotNull(dao.getAuth("token123"));
+        dao.deleteAuth("token123");
+        assertNull(dao.getAuth("token123"));
+    }
+
+    @Test
+    void deleteAuthNegativeDeletingMissingTokenDoesNotCrash() {
+        // Decide your contract: most simple DAOs just "do nothing" here.
+        assertDoesNotThrow(() -> dao.deleteAuth("missing-token"));
+    }
+
+    @Test
+    void createGamePositiveThenGetGameReturnsGame() {
+        int id = dao.createGame("my game");
+        assertTrue(id > 0);
+        GameData game = dao.getGame(id);
+        assertNotNull(game);
+        assertEquals(id, game.gameid());
+        assertEquals("my game", game.gamename());
+    }
+
+    @Test
+    void getGameNegativeMissingGameReturnsNull() {
+        assertNull(dao.getGame(999999));
+    }
+
+    @Test
+    void listGamesPositiveContainsCreatedGames() {
+        int id1 = dao.createGame("g1");
+        int id2 = dao.createGame("g2");
+        Collection<GameData> games = dao.listGames();
+        assertNotNull(games);
+        assertEquals(2, games.size());
+        assertTrue(games.stream().anyMatch(g -> g.gameid() == id1));
+        assertTrue(games.stream().anyMatch(g -> g.gameid() == id2));
+    }
+
+    @Test
+    void listGamesNegativeEmptyAtStart() {
+        Collection<GameData> games = dao.listGames();
+        assertNotNull(games);
+        assertEquals(0, games.size());
     }
 }
