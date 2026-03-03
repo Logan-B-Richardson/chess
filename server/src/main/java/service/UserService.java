@@ -24,6 +24,7 @@ public class UserService {
         }
         dao.createUser(new UserData(request.username(), request.password(), request.email()));
         String token = UUID.randomUUID().toString();
+        dao.createAuth(new AuthData(token, request.username()));
         return new RegisterResult(request.username(), token);
     }
 
@@ -46,5 +47,6 @@ public class UserService {
         if (token == null || dao.getAuth(token) == null) {
             throw new UnauthorizedException("unauthorized");
         }
+        dao.deleteAuth(token);
     }
 }

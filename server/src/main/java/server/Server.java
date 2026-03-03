@@ -1,6 +1,7 @@
 package server;
 
 import io.javalin.*;
+import io.javalin.http.Context;
 import com.google.gson.Gson;
 import dataaccess.*;
 import handler.*;
@@ -38,21 +39,15 @@ public class Server {
         javalin.post("/game", createGameHandler::handle);
         javalin.put("/game", joinGameHandler::handle);
 
-        // exceptions
-        javalin.exception(BadRequestException.class, (e, context) -> {
-            context.status(400).result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
-        });
-        javalin.exception(UnauthorizedException.class, (e, context) -> {
-            context.status(401).result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
-        });
-        javalin.exception(AlreadyTakenException.class , (e, context) -> {
-            context.status(402).result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
-        });
-        javalin.exception(ForbiddenException.class, (e, context) -> {
-            context.status(403).result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
-        });
-        javalin.exception(Exception.class, (e, context) -> {
-            context.status(500).result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+        // exception handling
+        javalin.exception(BadRequestException.class, (e, ctx) -> jsonError(ctx, 400, e));
+        javalin.exception(UnauthorizedException.class, (e, ctx) -> jsonError(ctx, 401, e));
+        javalin.exception(ForbiddenException.class, (e, ctx) -> jsonError(ctx, 403, e));
+        javalin.exception(AlreadyTakenException.class, (e, ctx) -> jsonError(ctx, 403, e));
+        javalin.exception(Exception.class, (e, ctx) -> {
+            ctx.status(500);
+            ctx.contentType("application/json");
+            ctx.result(gson.toJson(Map.of("message", "Error: internal server error")));
         });
     }
 
@@ -63,5 +58,11 @@ public class Server {
 
     public void stop() {
         javalin.stop();
+    }
+
+    private void jsonError(Context ctx, int status, Exception e) {
+        ctx.status(status);
+        ctx.contentType("application/json");
+        ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
     }
 }

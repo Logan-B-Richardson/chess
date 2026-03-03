@@ -1,4 +1,3 @@
 package service;
 
-public record GameSummary(int gameid, String whitename, String blackname, String gamename) {
-}
+public record GameSummary(int gameid, String gamename, String whiteusername, String blackusername) { }
