@@ -6,6 +6,8 @@ import dataaccess.*;
 import handler.*;
 import service.*;
 
+import java.util.Map;
+
 public class Server {
 
     private final Javalin javalin;
@@ -35,6 +37,23 @@ public class Server {
         javalin.get("/game", listGamesHandler::handle);
         javalin.post("/game", createGameHandler::handle);
         javalin.put("/game", joinGameHandler::handle);
+
+        // exceptions
+        javalin.exception(BadRequestException.class, (e, context) -> {
+            context.status(400).result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+        });
+        javalin.exception(UnauthorizedException.class, (e, context) -> {
+            context.status(401).result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+        });
+        javalin.exception(AlreadyTakenException.class , (e, context) -> {
+            context.status(402).result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+        });
+        javalin.exception(ForbiddenException.class, (e, context) -> {
+            context.status(403).result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+        });
+        javalin.exception(Exception.class, (e, context) -> {
+            context.status(500).result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+        });
     }
 
     public int run(int desiredPort) {
