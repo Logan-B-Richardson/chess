@@ -57,5 +57,4 @@ public class GameService {
         }
         dao.updateGame(game);
     }
-
 }
