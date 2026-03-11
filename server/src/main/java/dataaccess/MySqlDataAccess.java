@@ -134,7 +134,7 @@ public class MySqlDataAccess implements DataAccess{
     @Override
     public GameData getGame(int gameid) {
         String sql = """
-                SELECT gameID, whiteUsername, blackUsername, gameName, gameState
+                SELECT gameID, whiteUsername, blackUsername, gameName
                 FROM game
                 WHERE gameID = ?
                 """;
@@ -145,10 +145,10 @@ public class MySqlDataAccess implements DataAccess{
                 if (rs.next()) {
                     return new GameData(
                             rs.getInt("gameID"),
+                            null,
                             rs.getString("whiteUsername"),
                             rs.getString("blackUsername"),
-                            rs.getString("gameName"),
-                            null
+                            rs.getString("gameName")
                     );
                 }
             }
@@ -160,6 +160,26 @@ public class MySqlDataAccess implements DataAccess{
 
     @Override
     public Collection<GameData> listGames() {
+        String sql = """
+                SELECT gameID, whiteUsername, blackUsername, gameName
+                FROM game
+                """;
+        var games = new java.util.ArrayList<GameData>();
+        try (var con = DatabaseManager.getConnection();
+            var ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                games.add(new GameData(
+                        rs.getInt("gameID"),
+                        null,
+                        rs.getString("whiteUsername"),
+                        rs.getString("blackUsername"),
+                        rs.getString("gameName")
+                ));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return List.of();
     }
 
