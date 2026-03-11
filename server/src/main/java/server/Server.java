@@ -19,6 +19,7 @@ public class Server {
     private final Gson gson = new Gson();
 
     public Server() {
+        MySqlInitializer.configureDatabase();
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         // handler and service setup
