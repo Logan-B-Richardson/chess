@@ -112,6 +112,22 @@ public class MySqlDataAccess implements DataAccess{
 
     @Override
     public int createGame(String gamename) {
+        String sql = """
+                INSERT INTO game (gameName)
+                VALUES (?)
+                """;
+        try (var con = DatabaseManager.getConnection();
+            var ps = con.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, gamename);
+            ps.executeUpdate();
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return 0;
     }
 
