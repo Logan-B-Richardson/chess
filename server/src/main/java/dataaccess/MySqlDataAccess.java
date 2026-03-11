@@ -6,9 +6,8 @@ import model.UserData;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
-import java.util.List;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class MySqlDataAccess implements DataAccess{
     public MySqlDataAccess() {}
@@ -44,10 +43,11 @@ public class MySqlDataAccess implements DataAccess{
                     INSERT INTO user (username, password, email)
                     VALUES (?, ?, ?)
                     """;
+        String hashedPassword = BCrypt.hashpw(user.password(). BCrypt.gensalt());
         try (var con = DatabaseManager.getConnection();
              var ps = con.prepareStatement(sql)) {
                  ps.setString(1, user.username());
-                 ps.setString(2, user.password());
+                 ps.setString(2, hashedPassword);
                  ps.setString(3, user.email());
                  ps.executeUpdate();
         } catch (Exception e) {
@@ -180,7 +180,7 @@ public class MySqlDataAccess implements DataAccess{
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return List.of();
+        return games;
     }
 
     @Override
