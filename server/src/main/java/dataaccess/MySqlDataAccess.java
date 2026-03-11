@@ -60,6 +60,12 @@ public class MySqlDataAccess implements DataAccess{
 
     @Override
     public void clear() {
-
+        try (var con = DatabaseManager.getConnection()) {
+            con.prepareStatement("DELETE FROM auth").executeUpdate();
+            con.prepareStatement("DELETE FROM game").executeUpdate();
+            con.prepareStatement("DELETE FROM user").executeUpdate();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
