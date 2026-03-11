@@ -7,52 +7,59 @@ import model.UserData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.List;
 
-public class MySqlDataAccess {
-    public mySqlDataAccess() {}
+public class MySqlDataAccess implements DataAccess{
+    public MySqlDataAccess() {}
 
     @Override
-    public void clear () throws DataAccessException {
-        String deleteAuth = "DELETE FROM auth";
-        String deleteGame = "DELETE FROM game";
-        String deleteUser = "DELETE FROM user";
-        try (var con = DatabaseManager.getConnection()) {
-            try (PreparedStatement ps = con.prepareStatement(deleteAuth)) {
-                ps.executeUpdate();
-            }
-            try (PreparedStatement ps = con.prepareStatement(deleteGame)) {
-                ps.executeUpdate();
-            }
-            try (PreparedStatement ps = con.prepareStatement(deleteUser)) {
-                ps.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("unable to clear database", e);
-        }
+    public UserData getUser(String username) {
+        return null;
     }
 
     @Override
-    public UserData getUser(String username) throws DataAccessException {
-        String sql = """
-               SELECT username, password, email
-               FROM user
-               WHERE username = ?
-               """;
-        try (var con = DatabaseManager.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, username);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return new UserData(
-                            rs.getString("username"),
-                            rs.getString("password"),
-                            rs.getString("email")
-                    );
-                }
-            }
-            return null;
-        } catch (SQLException e) {
-            throw new DataAccessException("unable to get user", e);
-        }
+    public void createUser(UserData user) {
+
+    }
+
+    @Override
+    public AuthData getAuth(String authToken) {
+        return null;
+    }
+
+    @Override
+    public void createAuth(AuthData token) {
+
+    }
+
+    @Override
+    public void deleteAuth(String token) {
+
+    }
+
+    @Override
+    public int createGame(String gamename) {
+        return 0;
+    }
+
+    @Override
+    public GameData getGame(int gameid) {
+        return null;
+    }
+
+    @Override
+    public Collection<GameData> listGames() {
+        return List.of();
+    }
+
+    @Override
+    public void updateGame(GameData game) {
+
+    }
+
+    @Override
+    public void clear() {
+
     }
 }
