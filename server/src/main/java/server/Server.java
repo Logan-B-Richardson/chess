@@ -65,9 +65,16 @@ public class Server {
         javalin.stop();
     }
 
+    public static void main(String[] args) {
+        Server server = new Server();
+        server.run(8080);
+    }
+
     private void jsonError(Context ctx, int status, Exception e) {
         ctx.status(status);
         ctx.contentType("application/json");
         ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
     }
 }
+
+
