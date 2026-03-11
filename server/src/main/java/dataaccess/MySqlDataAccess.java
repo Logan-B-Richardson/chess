@@ -43,7 +43,7 @@ public class MySqlDataAccess implements DataAccess{
                     INSERT INTO user (username, password, email)
                     VALUES (?, ?, ?)
                     """;
-        String hashedPassword = BCrypt.hashpw(user.password(). BCrypt.gensalt());
+        String hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());
         try (var con = DatabaseManager.getConnection();
              var ps = con.prepareStatement(sql)) {
                  ps.setString(1, user.username());
