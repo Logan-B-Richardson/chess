@@ -133,6 +133,28 @@ public class MySqlDataAccess implements DataAccess{
 
     @Override
     public GameData getGame(int gameid) {
+        String sql = """
+                SELECT gameID, whiteUsername, blackUsername, gameName, gameState
+                FROM game
+                WHERE gameID = ?
+                """;
+        try (var con = DatabaseManager.getConnection();
+            var ps = con.prepareStatement(sql)) {
+            ps.setInt(1, gameid);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new GameData(
+                            rs.getInt("gameID"),
+                            rs.getString("whiteUsername"),
+                            rs.getString("blackUsername"),
+                            rs.getString("gameName"),
+                            null
+                    );
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return null;
     }
 
