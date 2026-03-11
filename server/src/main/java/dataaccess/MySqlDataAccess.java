@@ -20,7 +20,19 @@ public class MySqlDataAccess implements DataAccess{
 
     @Override
     public void createUser(UserData user) {
-
+        String sql = """
+                    INSERT INTO user (username, password, email)
+                    VALUES (?, ?, ?)
+                    """;
+        try (var con = DatabaseManager.getConnection();
+             var ps = con.prepareStatement(sql)) {
+                 ps.setString(1, user.username());
+                 ps.setString(2, user.password());
+                 ps.setString(3, user.email())
+                 ps.executeUpdate();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
