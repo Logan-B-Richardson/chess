@@ -23,7 +23,7 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         // handler and service setup
-        DataAccess dao = new DataAccessMemory();
+        DataAccess dao = new MySqlDataAccess();
         UserService userService = new UserService(dao);
         GameService gameService = new GameService(dao);
         ClearService clearService = new ClearService(dao);
