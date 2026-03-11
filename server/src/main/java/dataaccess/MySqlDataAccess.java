@@ -185,7 +185,20 @@ public class MySqlDataAccess implements DataAccess{
 
     @Override
     public void updateGame(GameData game) {
-
+        String sql = """
+                UPDATE game
+                SET whiteUsername = ?, blackUsername = ?
+                WHERE gameID = ?
+                """;
+        try (var con = DatabaseManager.getConnection();
+            var ps = con.prepareStatement(sql)) {
+            ps.setString(1, game.whiteusername());
+            ps.setString(2, game.blackusername());
+            ps.setInt(3, game.gameid());
+            ps.executeUpdate();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
