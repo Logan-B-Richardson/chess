@@ -10,6 +10,7 @@ import service.records.LoginRequest;
 import service.records.LoginResult;
 import service.records.RegisterRequest;
 import service.records.RegisterResult;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.UUID;
 
@@ -43,7 +44,7 @@ public class UserService {
             throw new BadRequestException("bad request");
         }
         UserData user = dao.getUser(request.username());
-        if (user == null || !user.password().equals(request.password())) {
+        if (user == null || !BCrypt.checkpw(request.password(), user.password())) {
             throw new UnauthorizedException("wrong password");
         }
         String token = UUID.randomUUID().toString();
