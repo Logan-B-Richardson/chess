@@ -15,6 +15,26 @@ public class MySqlDataAccess implements DataAccess{
 
     @Override
     public UserData getUser(String username) {
+        String sql = """
+                SELECT username, password, email
+                FROM user
+                WHERE username = ?
+                """;
+        try (var con = DatabaseManager.getConnection();
+            var ps = con.prepareStatement(sql)) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new UserData(
+                            rs.getString("username"),
+                            rs.getString("password"),
+                            rs.getString("email")
+                    );
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return null;
     }
 
