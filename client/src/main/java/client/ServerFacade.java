@@ -39,4 +39,10 @@ public class ServerFacade {
     }
 
     private record ErrorResponse(String message) {}
+
+    public record RegisterRequest(String username, String, String password, String email) {}
+    public record LoginRequest(String username, String password) {}
+    public record CreateGameRequest(String gameName) {}
+    public record JoinGameRequest(String playerColor, int gameID) {}
+    public record ListGamesResponse(java.util.List<model.GameData> games) {}
 }
