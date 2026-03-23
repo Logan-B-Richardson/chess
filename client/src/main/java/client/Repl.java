@@ -65,4 +65,39 @@ public class Repl {
         }
     }
 
+    private void printPreloginHelp() {
+        System.out.println("TODO");
+    }
+
+    private void printPostloginHelp() {
+        System.out.println("TODO");
+    }
+
+    private void login() {
+        System.out.println("TODO");
+    }
+
+    private void register() {
+        System.out.println("TODO");
+    }
+
+    private void logout() {
+        System.out.println("TODO");
+    }
+
+    private void createGame() {
+        System.out.println("TODO");
+    }
+
+    private void listGames() {
+        System.out.println("TODO");
+    }
+
+    private void playGame() {
+        System.out.println("TODO");
+    }
+
+    private void observeGame() {
+        System.out.println("TODO");
+    }
 }
