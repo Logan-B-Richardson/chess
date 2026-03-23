@@ -38,5 +38,5 @@ public class ServerFacade {
         return gson.fromJson(new InputStreamReader(http.getInputStream()), responseClass);
     }
 
-
+    private record ErrorResponse(String message) {}
 }
