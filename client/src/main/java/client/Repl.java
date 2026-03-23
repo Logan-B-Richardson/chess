@@ -36,4 +36,18 @@ public class Repl {
             }
         }
     }
+
+    private void handlePostlogin(String input) {
+        String command = input.toLowerCase();
+        switch (command) {
+            case "help" -> printPostloginHelp();
+            case "logout" -> logout();
+            case "create game" -> createGame();
+            case "list games" -> listGames();
+            case "play game" -> playGame();
+            case "observe game" -> observeGame();
+            default -> System.out.println("Unknown comman. Type help.");
+        }
+    }
+
 }
