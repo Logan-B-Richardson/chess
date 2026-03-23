@@ -37,6 +37,21 @@ public class Repl {
         }
     }
 
+    private boolean handlePrelogin(String input) {
+        String command = input.toLowerCase();
+        switch (command) {
+            case "help" -> printPreloginHelp();
+            case "quit" -> {
+                System.out.println("Goodbye.");
+                return true;
+            }
+            case "login" -> login();
+            case "register" -> register();
+            default -> System.out.println("Unknown command. Type help.");
+        }
+        return false;
+    }
+
     private void handlePostlogin(String input) {
         String command = input.toLowerCase();
         switch (command) {
