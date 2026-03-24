@@ -73,7 +73,12 @@ public class Repl {
     }
 
     private void printPostloginHelp() {
-        System.out.println("TODO");
+        System.out.println("help - show commands");
+        System.out.println("logout - sign out");
+        System.out.println("create game - create a game");
+        System.out.println("list games - list games");
+        System.out.println("play game - join a game");
+        System.out.println("observe game - observe a game");
     }
 
     private void login() {
