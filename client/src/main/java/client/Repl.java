@@ -86,7 +86,21 @@ public class Repl {
     }
 
     private void register() {
-        System.out.println("TODO");
+        try {
+            System.out.println("username: ");
+            String username = scanner.nextLine().trim();
+            System.out.print("password: ");
+            String password = scanner.nextLine().trim();
+            System.out.print("email: ");
+            String email = scanner.nextLine().trim();
+            var auth = server.register(username, password, email);
+            this.loggedIn = true;
+            this.authToken = auth.authToken();
+            this.username = auth.username();
+            System.out.println("Registered and logged in as " + username);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private void logout() {
