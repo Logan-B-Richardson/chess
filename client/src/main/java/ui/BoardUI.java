@@ -56,16 +56,13 @@ public class BoardUI {
 
     private static void drawSquare(ChessBoard board, int row, int col) {
         boolean lightSquare = ((row + col) % 2 == 0);
-
         if (lightSquare) {
             System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
         } else {
             System.out.print(EscapeSequences.SET_BG_COLOR_DARK_GREEN);
         }
-
         ChessPiece piece = board.getPiece(new chess.ChessPosition(row, col));
         System.out.print(pieceString(piece));
-
         System.out.print(EscapeSequences.RESET_BG_COLOR);
     }
 
@@ -73,13 +70,11 @@ public class BoardUI {
         if (piece == null) {
             return EscapeSequences.EMPTY;
         }
-
         return switch (piece.getTeamColor()) {
             case WHITE -> whitePiece(piece);
             case BLACK -> blackPiece(piece);
         };
     }
-
 
     private static String blackPiece(ChessPiece piece) {
         return switch (piece.getPieceType()) {

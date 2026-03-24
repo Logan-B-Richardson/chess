@@ -1,6 +1,8 @@
 package client;
 
 import service.records.GameSummary;
+import chess.ChessGame;
+import ui.BoardUI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
