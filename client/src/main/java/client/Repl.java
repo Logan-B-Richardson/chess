@@ -3,6 +3,7 @@ package client;
 import service.records.GameSummary;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -57,15 +58,16 @@ public class Repl {
     }
 
     private void handlePostlogin(String input) {
-        String command = input.toLowerCase();
+        String[] tokens = input.split(" ");
+        String command = tokens[0].toLowerCase();
         switch (command) {
-            case "help" -> printPostloginHelp();
+            case "create" -> createGame(tokens);
+            case "list" -> listGames();
+            case "play" -> playGame(tokens);
+            case "observe" -> observeGame(tokens);
             case "logout" -> logout();
-            case "create game" -> createGame();
-            case "list games" -> listGames();
-            case "play game" -> playGame();
-            case "observe game" -> observeGame();
-            default -> System.out.println("Unknown command. Type help.");
+            case "help" -> printPostloginHelp();
+            default -> System.out.println("Unknown command.");
         }
     }
 
@@ -132,14 +134,13 @@ public class Repl {
         }
     }
 
-    private void createGame() {
+    private void createGame(String[] tokens) {
+        if (tokens.length < 2) {
+            System.out.println("Usage: create <game name>");
+            return;
+        }
+        String gameName = String.join(" ", Arrays.copyOfRange(tokens, 1, tokens.length));
         try {
-            System.out.print("game name: ");
-            String gameName = scanner.nextLine().trim();
-            if (gameName.isEmpty()) {
-                System.out.println("Game name cannot be empty.");
-                return;
-            }
             server.createGame(authToken, gameName);
             System.out.println("Game created.");
         } catch (Exception e) {
@@ -165,33 +166,42 @@ public class Repl {
         }
     }
 
-    private void playGame() {
+    private void playGame(String[] tokens) {
+        if (tokens.length != 3) {
+            System.out.println("Usage: play <game number> <WHITE|BLACK>");
+            return;
+        }
         try {
-            Integer gameID = getGameIdFromUser();
-            if (gameID == null) {
+            int num = Integer.parseInt(tokens[1]);
+            String color = tokens[2].toUpperCase();
+            if (num < 1 || num > lastListedGames.size()) {
+                System.out.println("Invalid game number.");
                 return;
             }
-            System.out.print("color (WHITE or BLACK): ");
-            String color = scanner.nextLine().trim().toUpperCase();
-            if (!color.equals("WHITE") && !color.equals("BLACK")) {
-                System.out.println("Color must be WHITE or BLACK.");
-                return;
-            }
+            int gameID = lastListedGames.get(num - 1).gameID();
             server.joinGame(authToken, color, gameID);
             System.out.println("Joined game.");
-            // insert board stuff
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
-    private void observeGame() {
-        Integer gameID = getGameIdFromUser();
-        if (gameID == null) {
+    private void observeGame(String[] tokens) {
+        if (tokens.length != 2) {
+            System.out.println("Usage: observe <game number>");
             return;
         }
-        System.out.println("Observing game.");
-        // insert board stuff
+        try {
+            int num = Integer.parseInt(tokens[1]);
+            if (num < 1 || num > lastListedGames.size()) {
+                System.out.println("Invalid game number.");
+                return;
+            }
+            int gameID = lastListedGames.get(num - 1).gameID();
+            System.out.println("Observing game " + gameID);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private Integer getGameIdFromUser() {

@@ -83,8 +83,8 @@ public class ServerFacade {
         int status = http.getResponseCode();
         if (status / 100 != 2) {
             if (http.getErrorStream() != null) {
-                try (InputStreamReader errorReader = new InputStreamReader(
-                        http.getErrorStream(), StandardCharsets.UTF_8)) {
+                try (InputStreamReader errorReader =
+                             new InputStreamReader(http.getErrorStream(), StandardCharsets.UTF_8)) {
                     ErrorResponse error = gson.fromJson(errorReader, ErrorResponse.class);
                     if (error != null && error.message() != null) {
                         throw new Exception(error.message());
