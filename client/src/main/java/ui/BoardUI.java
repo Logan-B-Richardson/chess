@@ -22,7 +22,7 @@ public class BoardUI {
         System.out.println();
     }
 
-    private static void drawBlackView(ChessBoard board) {
+    private static void drawWhiteView(ChessBoard board) {
         printFilesWhite();
         for (int row = 8; row >= 1; row --) {
             System.out.print(" " + row + " ");
