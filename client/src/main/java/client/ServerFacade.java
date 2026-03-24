@@ -20,6 +20,20 @@ public class ServerFacade {
         this.serverUrl = serverUrl;
     }
 
+    public AuthData register(String username, String password, String email) throws Exception {
+        return makeRequest("POST", "/user",
+                new RegisterRequest(username, password, email),
+                null,
+                AuthData.class);
+    }
+
+    public AuthData login(String username, String password) throws Exception {
+        return makeRequest("POST", "/session",
+                new LoginRequest(username, password),
+                null,
+                AuthData.class);
+    }
+
     private <T> T makeRequest(String method, String path, Object requestBody, String authToken, Class<T> responseClass) throws Exception {
         URL url = (URI.create(serverUrl + path)).toURL();
         HttpURLConnection http = (HttpURLConnection) url.openConnection();
