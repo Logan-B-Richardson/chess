@@ -168,4 +168,22 @@ public class Repl {
     private void observeGame() {
         System.out.println("TODO");
     }
+
+    private Integer getGameIdFromUser() {
+        if (lastListedGames.isEmpty()) {
+            System.out.println("Run 'list games' first.");
+        }
+        try {
+            System.out.print("game number: ");
+            int num = Integer.parseInt(scanner.nextLine().trim());
+            if (num < 1 || num > lastListedGames.size()) {
+                System.out.println("Invalid game number.");
+                return null;
+            }
+            return lastListedGames.get(num - 1).gameID();
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a valid number.");
+            return null;
+        }
+    }
 }
