@@ -2,6 +2,10 @@ package client;
 
 import com.google.gson.Gson;
 
+import model.AuthData;
+import service.records.ListGameResults;
+import service.records.GameSummary;
+
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -22,6 +26,9 @@ public class ServerFacade {
         http.setRequestMethod(method);
         http.setRequestProperty("Content-Type", "application/json");
         if (authToken != null) {
+            http.setRequestProperty("Authorization", authToken);
+        }
+        if (requestBody != null) {
             http.setDoOutput(true);
             try (OutputStream os = http.getOutputStream()) {
                 os.write(gson.toJson(requestBody).getBytes());
@@ -44,5 +51,4 @@ public class ServerFacade {
     public record LoginRequest(String username, String password) {}
     public record CreateGameRequest(String gameName) {}
     public record JoinGameRequest(String playerColor, int gameID) {}
-    public record ListGamesResponse(java.util.List<model.GameData> games) {}
 }
