@@ -34,6 +34,12 @@ public class ServerFacade {
                 AuthData.class);
     }
 
+    public void logout(String authToken) throws Exception {
+        makeRequest("DELETE", "/session", null, authToken, null);
+    }
+
+
+
     private <T> T makeRequest(String method, String path, Object requestBody, String authToken, Class<T> responseClass) throws Exception {
         URL url = (URI.create(serverUrl + path)).toURL();
         HttpURLConnection http = (HttpURLConnection) url.openConnection();
