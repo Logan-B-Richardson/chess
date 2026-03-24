@@ -162,7 +162,23 @@ public class Repl {
     }
 
     private void playGame() {
-        System.out.println("TODO");
+        try {
+            Integer gameID = getGameIdFromUser();
+            if (gameID == null) {
+                return;
+            }
+            System.out.print("color (WHITE or BLACK): ");
+            String color = scanner.nextLine().trim().toUpperCase();
+            if (!color.equals("WHITE") && !color.equals("BLACK")) {
+                System.out.println("Color must be WHITE or BLACK.");
+                return;
+            }
+            server.joinGame(authToken, color, gameID);
+            System.out.println("Joined game.");
+            // insert board stuff
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private void observeGame() {
