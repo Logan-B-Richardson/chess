@@ -182,7 +182,12 @@ public class Repl {
     }
 
     private void observeGame() {
-        System.out.println("TODO");
+        Integer gameID = getGameIdFromUser();
+        if (gameID == null) {
+            return;
+        }
+        System.out.println("Observing game.");
+        // insert board stuff
     }
 
     private Integer getGameIdFromUser() {
