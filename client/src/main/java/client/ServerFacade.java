@@ -38,7 +38,14 @@ public class ServerFacade {
         makeRequest("DELETE", "/session", null, authToken, null);
     }
 
-
+    public int createGame(String authToken, String gameName) throws Exception {
+        CreateGameResponse response = makeRequest("POST", "/game",
+                new CreateGameRequest(gameName),
+                authToken,
+                CreateGameResponse.class);
+        assert response != null;
+        return response.gameID();
+    }
 
     private <T> T makeRequest(String method, String path, Object requestBody, String authToken, Class<T> responseClass) throws Exception {
         URL url = (URI.create(serverUrl + path)).toURL();
@@ -71,4 +78,5 @@ public class ServerFacade {
     public record LoginRequest(String username, String password) {}
     public record CreateGameRequest(String gameName) {}
     public record JoinGameRequest(String playerColor, int gameID) {}
+    public record CreateGameResponse(int gameID) {}
 }
