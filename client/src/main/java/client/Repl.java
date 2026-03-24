@@ -183,6 +183,11 @@ public class Repl {
             int gameID = lastListedGames.get(num - 1).gameID();
             server.joinGame(authToken, color, gameID);
             System.out.println("Joined game.");
+            ChessGame game = new ChessGame();
+            game.getBoard().resetBoard();
+            ChessGame.TeamColor perspective = color.equals("BLACK") ?
+                    ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+            BoardUI.drawBoard(game, perspective);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -201,6 +206,9 @@ public class Repl {
             }
             int gameID = lastListedGames.get(num - 1).gameID();
             System.out.println("Observing game " + gameID);
+            ChessGame game = new ChessGame();
+            game.getBoard().resetBoard();
+            BoardUI.drawBoard(game, ChessGame.TeamColor.WHITE);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
