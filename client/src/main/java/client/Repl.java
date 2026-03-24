@@ -65,7 +65,7 @@ public class Repl {
             case "list games" -> listGames();
             case "play game" -> playGame();
             case "observe game" -> observeGame();
-            default -> System.out.println("Unknown comman. Type help.");
+            default -> System.out.println("Unknown command. Type help.");
         }
     }
 
@@ -87,7 +87,7 @@ public class Repl {
 
     private void login() {
         try {
-            System.out.println("username: ");
+            System.out.print("username: ");
             String username = scanner.nextLine().trim();
             System.out.print("password: ");
             String password = scanner.nextLine().trim();
@@ -103,7 +103,7 @@ public class Repl {
 
     private void register() {
         try {
-            System.out.println("username: ");
+            System.out.print("username: ");
             String username = scanner.nextLine().trim();
             System.out.print("password: ");
             String password = scanner.nextLine().trim();
@@ -126,7 +126,7 @@ public class Repl {
             authToken = null;
             username = null;
             lastListedGames.clear();
-            System.out.println("logged out.");
+            System.out.println("Logged out.");
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -134,7 +134,7 @@ public class Repl {
 
     private void createGame() {
         try {
-            System.out.println("game name: ");
+            System.out.print("game name: ");
             String gameName = scanner.nextLine().trim();
             if (gameName.isEmpty()) {
                 System.out.println("Game name cannot be empty.");
@@ -197,6 +197,7 @@ public class Repl {
     private Integer getGameIdFromUser() {
         if (lastListedGames.isEmpty()) {
             System.out.println("Run 'list games' first.");
+            return null;
         }
         try {
             System.out.print("game number: ");
