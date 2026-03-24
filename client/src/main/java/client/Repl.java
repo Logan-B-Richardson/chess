@@ -16,6 +16,10 @@ public class Repl {
     private String username = null;
     private List<GameSummary> lastListedGames = new ArrayList<>();
 
+    public Repl(String serverUrl) {
+        this.server = new ServerFacade(serverUrl);
+    }
+
     public void run() {
         System.out.println("Welcome to Chess. Type help to get started.");
         while (true) {
