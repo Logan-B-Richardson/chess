@@ -129,7 +129,18 @@ public class Repl {
     }
 
     private void createGame() {
-        System.out.println("TODO");
+        try {
+            System.out.println("game name: ");
+            String gameName = scanner.nextLine().trim();
+            if (gameName.isEmpty()) {
+                System.out.println("Game name cannot be empty.");
+                return;
+            }
+            server.createGame(authToken, gameName);
+            System.out.println("Game created.");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private void listGames() {
