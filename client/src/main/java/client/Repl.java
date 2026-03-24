@@ -1,6 +1,5 @@
 package client;
 
-import model.GameData;
 import service.records.GameSummary;
 
 import java.util.ArrayList;
@@ -15,7 +14,7 @@ public class Repl {
     private boolean loggedIn = false;
     private String authToken = null;
     private String username = null;
-    private List<GameData> lastListedGames = new ArrayList<>();
+    private List<GameSummary> lastListedGames = new ArrayList<>();
 
     public void run() {
         System.out.println("Welcome to Chess. Type help to get started.");
@@ -28,7 +27,7 @@ public class Repl {
                         break;
                     }
                 } else {
-                    System.out.print("[LOGGED_OUT] >>> ");
+                    System.out.print("[LOGGED_IN] >>> ");
                     String input = scanner.nextLine().trim();
                     handlePostlogin(input);
                 }
@@ -54,7 +53,6 @@ public class Repl {
     }
 
     private void handlePostlogin(String input) {
-        System.out.print("[LOGGED_IN] >>> ");
         String command = input.toLowerCase();
         switch (command) {
             case "help" -> printPostloginHelp();
@@ -68,7 +66,10 @@ public class Repl {
     }
 
     private void printPreloginHelp() {
-        System.out.println("TODO");
+        System.out.println("help - show commands");
+        System.out.println("register - create account");
+        System.out.println("login - sign in");
+        System.out.println("quit - exit");
     }
 
     private void printPostloginHelp() {
