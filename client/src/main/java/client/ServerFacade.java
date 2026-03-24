@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.List;
 
 public class ServerFacade {
     private final String serverUrl;
@@ -45,6 +46,12 @@ public class ServerFacade {
                 CreateGameResponse.class);
         assert response != null;
         return response.gameID();
+    }
+
+    public List<GameSummary> listGames(String authToken) throws Exception {
+        ListGameResults response = makeRequest("GET", "/game", null, authToken, ListGameResults.class);
+        assert response != null;
+        return response.games();
     }
 
     private <T> T makeRequest(String method, String path, Object requestBody, String authToken, Class<T> responseClass) throws Exception {
