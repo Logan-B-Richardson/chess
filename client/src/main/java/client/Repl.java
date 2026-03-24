@@ -116,7 +116,16 @@ public class Repl {
     }
 
     private void logout() {
-        System.out.println("TODO");
+        try {
+            server.logout(authToken);
+            loggedIn = false;
+            authToken = null;
+            username = null;
+            lastListedGames.clear();
+            System.out.println("logged out.");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private void createGame() {
