@@ -52,7 +52,6 @@ public class ServerFacade {
                 null,
                 authToken,
                 ListGameResults.class);
-        assert response != null;
         return response.games();
     }
 
@@ -83,14 +82,16 @@ public class ServerFacade {
         }
         int status = http.getResponseCode();
         if (status / 100 != 2) {
-            InputStreamReader errorReader = new InputStreamReader(
-                    http.getErrorStream(), StandardCharsets.UTF_8);
-            ErrorResponse error = gson.fromJson(errorReader, ErrorResponse.class);
-            if (error != null && error.message() != null) {
-                throw new Exception(error.message());
-            } else {
-                throw new Exception("Request failed with status code " + status);
+            if (http.getErrorStream() != null) {
+                try (InputStreamReader errorReader = new InputStreamReader(
+                        http.getErrorStream(), StandardCharsets.UTF_8)) {
+                    ErrorResponse error = gson.fromJson(errorReader, ErrorResponse.class);
+                    if (error != null && error.message() != null) {
+                        throw new Exception(error.message());
+                    }
+                }
             }
+            throw new Exception("Request failed with status code " + status);
         }
         if (responseClass == null) {
             return null;
