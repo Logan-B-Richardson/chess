@@ -52,6 +52,7 @@ public class ServerFacade {
                 null,
                 authToken,
                 ListGameResults.class);
+        assert response != null;
         return response.games();
     }
 
@@ -62,13 +63,11 @@ public class ServerFacade {
                 null);
     }
 
-    private <T> T makeRequest(
-            String method,
-            String path,
-            Object requestBody,
-            String authToken,
-            Class<T> responseClass
-    ) throws Exception {
+    private <T> T makeRequest(String method,
+                              String path,
+                              Object requestBody,
+                              String authToken,
+                              Class<T> responseClass) throws Exception {
         URL url = URI.create(serverUrl + path).toURL();
         HttpURLConnection http = (HttpURLConnection) url.openConnection();
         http.setRequestMethod(method);

@@ -1,6 +1,7 @@
 package client;
 
 import model.GameData;
+import service.records.GameSummary;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,7 @@ public class Repl {
     }
 
     private void handlePostlogin(String input) {
+        System.out.print("[LOGGED_IN] >>> ");
         String command = input.toLowerCase();
         switch (command) {
             case "help" -> printPostloginHelp();
