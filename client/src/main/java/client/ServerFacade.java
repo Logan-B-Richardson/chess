@@ -1,16 +1,16 @@
 package client;
 
 import com.google.gson.Gson;
-
 import model.AuthData;
-import service.records.ListGameResults;
 import service.records.GameSummary;
+import service.records.ListGameResults;
 
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class ServerFacade {
@@ -44,13 +44,14 @@ public class ServerFacade {
                 new CreateGameRequest(gameName),
                 authToken,
                 CreateGameResponse.class);
-        assert response != null;
         return response.gameID();
     }
 
     public List<GameSummary> listGames(String authToken) throws Exception {
-        ListGameResults response = makeRequest("GET", "/game", null, authToken, ListGameResults.class);
-        assert response != null;
+        ListGameResults response = makeRequest("GET", "/game",
+                null,
+                authToken,
+                ListGameResults.class);
         return response.games();
     }
 
@@ -61,8 +62,14 @@ public class ServerFacade {
                 null);
     }
 
-    private <T> T makeRequest(String method, String path, Object requestBody, String authToken, Class<T> responseClass) throws Exception {
-        URL url = (URI.create(serverUrl + path)).toURL();
+    private <T> T makeRequest(
+            String method,
+            String path,
+            Object requestBody,
+            String authToken,
+            Class<T> responseClass
+    ) throws Exception {
+        URL url = URI.create(serverUrl + path).toURL();
         HttpURLConnection http = (HttpURLConnection) url.openConnection();
         http.setRequestMethod(method);
         http.setRequestProperty("Content-Type", "application/json");
@@ -72,22 +79,33 @@ public class ServerFacade {
         if (requestBody != null) {
             http.setDoOutput(true);
             try (OutputStream os = http.getOutputStream()) {
-                os.write(gson.toJson(requestBody).getBytes());
+                os.write(gson.toJson(requestBody).getBytes(StandardCharsets.UTF_8));
             }
         }
         int status = http.getResponseCode();
         if (status / 100 != 2) {
-            ErrorResponse error = gson.fromJson(new InputStreamReader(http.getErrorStream()), ErrorResponse.class);
-            throw new Exception(error.message());
+            InputStreamReader errorReader = new InputStreamReader(
+                    http.getErrorStream(), StandardCharsets.UTF_8);
+            ErrorResponse error = gson.fromJson(errorReader, ErrorResponse.class);
+            if (error != null && error.message() != null) {
+                throw new Exception(error.message());
+            } else {
+                throw new Exception("Request failed with status code " + status);
+            }
         }
         if (responseClass == null) {
             return null;
         }
-        return gson.fromJson(new InputStreamReader(http.getInputStream()), responseClass);
+        try (InputStreamReader inputReader = new InputStreamReader(
+                http.getInputStream(), StandardCharsets.UTF_8)) {
+            return gson.fromJson(inputReader, responseClass);
+        }
     }
 
     private record ErrorResponse(String message) {}
 
+    public record RegisterRequest(String username, String password, String email) {}
+    public record LoginRequest(String username, String password) {}
     public record CreateGameRequest(String gameName) {}
     public record JoinGameRequest(String playerColor, int gameID) {}
     public record CreateGameResponse(int gameID) {}
