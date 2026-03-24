@@ -144,7 +144,21 @@ public class Repl {
     }
 
     private void listGames() {
-        System.out.println("TODO");
+        try {
+            lastListedGames = server.listGames(authToken);
+            if (lastListedGames.isEmpty()) {
+                System.out.println("No games found.");
+                return;
+            }
+            for (int i = 0; i < lastListedGames.size(); i++) {
+                var game = lastListedGames.get(i);
+                String white = game.whiteUsername() == null ? "<open>" : game.whiteUsername();
+                String black = game.blackUsername() == null ? "<open>" : game.blackUsername();
+                System.out.printf("%d. %s - White: %s, Black: %s%n", i+1, game.gameName(), white, black);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private void playGame() {
