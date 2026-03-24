@@ -22,6 +22,18 @@ public class BoardUI {
         System.out.println();
     }
 
+    private static void drawBlackView(ChessBoard board) {
+        printFilesBlack();
+        for (int row = 1; row <= 8; row++) {
+            System.out.print(" " + row + " ");
+            for (int col = 8; col >= 1; col--) {
+                drawSquare(board, row, col);
+            }
+            System.out.println(" " + row);
+        }
+        printFilesBlack();
+    }
+
     private static void drawWhiteView(ChessBoard board) {
         printFilesWhite();
         for (int row = 8; row >= 1; row --) {
@@ -34,15 +46,13 @@ public class BoardUI {
         printFilesWhite();
     }
 
-
-
+    private static void printFilesBlack() {
+        System.out.println("    h  g  f  e  d  c  b  a");
+    }
 
     private static void printFilesWhite() {
         System.out.println("    a  b  c  d  e  f  g  h");
     }
-
-
-
 
     private static void drawSquare(ChessBoard board, int row, int col) {
         boolean lightSquare = ((row + col) % 2 == 0);
@@ -70,6 +80,18 @@ public class BoardUI {
         };
     }
 
+
+    private static String blackPiece(ChessPiece piece) {
+        return switch (piece.getPieceType()) {
+            case KING -> EscapeSequences.BLACK_KING;
+            case QUEEN -> EscapeSequences.BLACK_QUEEN;
+            case BISHOP -> EscapeSequences.BLACK_BISHOP;
+            case KNIGHT -> EscapeSequences.BLACK_KNIGHT;
+            case ROOK -> EscapeSequences.BLACK_ROOK;
+            case PAWN -> EscapeSequences.BLACK_PAWN;
+        };
+    }
+
     private static String whitePiece(ChessPiece piece) {
         return switch (piece.getPieceType()) {
             case KING -> EscapeSequences.WHITE_KING;
@@ -79,5 +101,5 @@ public class BoardUI {
             case ROOK -> EscapeSequences.WHITE_ROOK;
             case PAWN -> EscapeSequences.WHITE_PAWN;
         };
-
+    }
 }
