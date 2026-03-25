@@ -91,7 +91,16 @@ public class ServerFacade {
                     }
                 }
             }
-            throw new Exception("Request failed with status code " + status);
+            if (status == 400) {
+                throw new Exception("Bad request.");
+            }
+            if (status == 401) {
+                throw new Exception("Unauthorized.");
+            }
+            if (status == 403) {
+                throw new Exception("Already taken.");
+            }
+            throw new Exception("The request could not be completed.");
         }
         if (responseClass == null) {
             return null;
