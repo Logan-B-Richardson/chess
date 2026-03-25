@@ -3,7 +3,10 @@ package client;
 import model.AuthData;
 import org.junit.jupiter.api.*;
 import server.Server;
+import service.records.GameSummary;
+
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ServerFacadeTests {
@@ -15,96 +18,118 @@ public class ServerFacadeTests {
         server = new Server();
         var port = server.run(0);
         serverUrl = "http://localhost:" + port;
-        System.out.println("Started test HTTP server on " + port);
     }
 
     @AfterAll
-    static void stopServer() {
+    public static void stopServer() {
         server.stop();
+    }
+
+    private ServerFacade newFacade() {
+        return new ServerFacade(serverUrl);
+    }
+    private String uniqueUsername() {
+        return "user" + System.nanoTime();
     }
 
     @Test
     public void registerSuccess() throws Exception {
-        ServerFacade facade = new ServerFacade(serverUrl);
-        String username = "user" + System.currentTimeMillis();
-        AuthData auth = facade.register(username, "pass", "email@test.com");
+        ServerFacade facade = newFacade();
+        AuthData auth = facade.register(uniqueUsername(), "pass", "email@test.com");
+        assertNotNull(auth);
         assertNotNull(auth.authToken());
+        assertNotNull(auth.username());
+    }
+
+    @Test
+    public void registerFail() throws Exception {
+        ServerFacade facade = newFacade();
+        String username = uniqueUsername();
+        facade.register(username, "pass", "email@test.com");
+        assertThrows(Exception.class, () ->
+                facade.register(username, "pass", "email@test.com"));
     }
 
     @Test
     public void loginSuccess() throws Exception {
-        ServerFacade facade = new ServerFacade(serverUrl);
-        String username = "user" + System.currentTimeMillis();
+        ServerFacade facade = newFacade();
+        String username = uniqueUsername();
         facade.register(username, "pass", "email@test.com");
         AuthData auth = facade.login(username, "pass");
+        assertNotNull(auth);
         assertNotNull(auth.authToken());
+        assertEquals(username, auth.username());
+    }
+
+    @Test
+    public void loginFail() throws Exception {
+        ServerFacade facade = newFacade();
+        String username = uniqueUsername();
+        facade.register(username, "pass", "email@test.com");
+        assertThrows(Exception.class, () ->
+                facade.login(username, "wrongpass"));
+    }
+
+    @Test
+    public void logoutSuccess() throws Exception {
+        ServerFacade facade = newFacade();
+        AuthData auth = facade.register(uniqueUsername(), "pass", "email@test.com");
+        assertDoesNotThrow(() -> facade.logout(auth.authToken()));
+    }
+
+    @Test
+    public void logoutFail() {
+        ServerFacade facade = newFacade();
+        assertThrows(Exception.class, () ->
+                facade.logout("badAuthToken"));
     }
 
     @Test
     public void createGameSuccess() throws Exception {
-        ServerFacade facade = new ServerFacade(serverUrl);
-        String username = "user" + System.currentTimeMillis();
-        AuthData auth = facade.register(username, "pass", "email@test.com");
+        ServerFacade facade = newFacade();
+        AuthData auth = facade.register(uniqueUsername(), "pass", "email@test.com");
         int gameID = facade.createGame(auth.authToken(), "testGame");
         assertTrue(gameID > 0);
     }
 
     @Test
+    public void createGameFail() {
+        ServerFacade facade = newFacade();
+        assertThrows(Exception.class, () ->
+                facade.createGame("badAuthToken", "testGame"));
+    }
+
+    @Test
     public void listGamesSuccess() throws Exception {
-        ServerFacade facade = new ServerFacade(serverUrl);
-        String username = "user" + System.currentTimeMillis();
-        AuthData auth = facade.register(username, "pass", "email@test.com");
+        ServerFacade facade = newFacade();
+        AuthData auth = facade.register(uniqueUsername(), "pass", "email@test.com");
         facade.createGame(auth.authToken(), "game1");
-        List<?> games = facade.listGames(auth.authToken());
+        List<GameSummary> games = facade.listGames(auth.authToken());
         assertNotNull(games);
-        assertTrue(games.size() >= 1);
+        assertFalse(games.isEmpty());
+    }
+
+    @Test
+    public void listGamesFail() {
+        ServerFacade facade = newFacade();
+        assertThrows(Exception.class, () ->
+                facade.listGames("badAuthToken"));
     }
 
     @Test
     public void joinGameSuccess() throws Exception {
-        ServerFacade facade = new ServerFacade(serverUrl);
-        String username = "user" + System.currentTimeMillis();
-        AuthData auth = facade.register(username, "pass", "email@test.com");
+        ServerFacade facade = newFacade();
+        AuthData auth = facade.register(uniqueUsername(), "pass", "email@test.com");
         int gameID = facade.createGame(auth.authToken(), "game1");
-        facade.joinGame(auth.authToken(), "WHITE", gameID);
-        assertTrue(true);
+        assertDoesNotThrow(() ->
+                facade.joinGame(auth.authToken(), "WHITE", gameID));
     }
 
     @Test
-    public void registerDuplicateFail() throws Exception {
-        ServerFacade facade = new ServerFacade(serverUrl);
-        String username = "user" + System.currentTimeMillis();
-        facade.register(username, "pass", "email@test.com");
-        assertThrows(Exception.class, () -> {
-            facade.register(username, "pass", "email@test.com");
-        });
-    }
-
-    @Test
-    public void loginWrongPasswordFail() throws Exception {
-        ServerFacade facade = new ServerFacade(serverUrl);
-        String username = "user" + System.currentTimeMillis();
-        facade.register(username, "pass", "email@test.com");
-        assertThrows(Exception.class, () -> {
-            facade.login(username, "wrong");
-        });
-    }
-
-    @Test
-    public void listGamesUnauthorizedFail() {
-        ServerFacade facade = new ServerFacade(serverUrl);
-        assertThrows(Exception.class, () -> {
-            facade.listGames("badAuthToken");
-        });
-    }
-
-    @Test
-    public void joinGameInvalidFail() throws Exception {
-        ServerFacade facade = new ServerFacade(serverUrl);
-        String username = "user" + System.currentTimeMillis();
-        AuthData auth = facade.register(username, "pass", "email@test.com");
-        assertThrows(Exception.class, () -> {
-            facade.joinGame(auth.authToken(), "WHITE", 999999);
-        });
+    public void joinGameFail() throws Exception {
+        ServerFacade facade = newFacade();
+        AuthData auth = facade.register(uniqueUsername(), "pass", "email@test.com");
+        assertThrows(Exception.class, () ->
+                facade.joinGame(auth.authToken(), "WHITE", 999999));
     }
 }
