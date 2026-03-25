@@ -229,24 +229,6 @@ public class Repl {
         }
     }
 
-    private Integer getGameIdFromUser() {
-        if (lastListedGames.isEmpty()) {
-            System.out.println("Run 'list games' first.");
-            return null;
-        }
-        try {
-            System.out.print("game number: ");
-            int num = Integer.parseInt(scanner.nextLine().trim());
-            if (num < 1 || num > lastListedGames.size()) {
-                System.out.println("Invalid game number.");
-                return null;
-            }
-            return lastListedGames.get(num - 1).gameID();
-        } catch (NumberFormatException e) {
-            System.out.println("Please enter a valid number.");
-            return null;
-        }
-    }
 
     private String friendlyMessage(Exception e) {
         String msg = e.getMessage();
