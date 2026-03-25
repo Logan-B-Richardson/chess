@@ -180,15 +180,14 @@ public class Repl {
     }
 
     private void playGame(String[] tokens) {
-        if (lastListedGames.isEmpty()) {
-            System.out.println("List games first.");
-            return;
-        }
-        if (tokens.length != 3) {
-            System.out.println("Usage: play <game number> <WHITE|BLACK>");
-            return;
-        }
         try {
+            if (lastListedGames.isEmpty()) {
+                lastListedGames = server.listGames(authToken);
+            }
+            if (tokens.length != 3) {
+                System.out.println("Usage: play <game number> <WHITE|BLACK>");
+                return;
+            }
             int num = Integer.parseInt(tokens[1]);
             String color = tokens[2].toUpperCase();
             if (!color.equals("WHITE") && !color.equals("BLACK")) {
