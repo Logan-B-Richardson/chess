@@ -59,7 +59,7 @@ public class BoardUI {
         if (lightSquare) {
             System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
         } else {
-            System.out.print(EscapeSequences.SET_BG_COLOR_BLACK);
+            System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
         }
         ChessPiece piece = board.getPiece(new chess.ChessPosition(row, col));
         System.out.print(pieceString(piece));
