@@ -39,7 +39,7 @@ public class Repl {
                     handlePostlogin(input);
                 }
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                System.out.println(friendlyMessage(e));
             }
         }
     }
@@ -83,10 +83,10 @@ public class Repl {
     private void printPostloginHelp() {
         System.out.println("help - show commands");
         System.out.println("logout - sign out");
-        System.out.println("create game - create a game");
-        System.out.println("list games - list games");
-        System.out.println("play game - join a game");
-        System.out.println("observe game - observe a game");
+        System.out.println("create <game name> - create a game");
+        System.out.println("list - list games");
+        System.out.println("play <game number> <WHITE|BLACK> - join a game");
+        System.out.println("observe <game number> - observe a game");
     }
 
     private void login() {
@@ -101,7 +101,7 @@ public class Repl {
             this.username = auth.username();
             System.out.println("Logged in as " + username);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println(friendlyMessage(e));
         }
     }
 
@@ -119,7 +119,7 @@ public class Repl {
             this.username = auth.username();
             System.out.println("Registered and logged in as " + username);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println(friendlyMessage(e));
         }
     }
 
@@ -132,7 +132,7 @@ public class Repl {
             lastListedGames.clear();
             System.out.println("Logged out.");
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println(friendlyMessage(e));
         }
     }
 
@@ -146,7 +146,7 @@ public class Repl {
             server.createGame(authToken, gameName);
             System.out.println("Game created.");
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println(friendlyMessage(e));
         }
     }
 
@@ -164,11 +164,15 @@ public class Repl {
                 System.out.printf("%d. %s - White: %s, Black: %s%n", i+1, game.gameName(), white, black);
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println(friendlyMessage(e));
         }
     }
 
     private void playGame(String[] tokens) {
+        if (lastListedGames.isEmpty()) {
+            System.out.println("List games first.");
+            return;
+        }
         if (tokens.length != 3) {
             System.out.println("Usage: play <game number> <WHITE|BLACK>");
             return;
@@ -176,6 +180,10 @@ public class Repl {
         try {
             int num = Integer.parseInt(tokens[1]);
             String color = tokens[2].toUpperCase();
+            if (!color.equals("WHITE") && !color.equals("BLACK")) {
+                System.out.println("Color must be WHITE or BLACK.");
+                return;
+            }
             if (num < 1 || num > lastListedGames.size()) {
                 System.out.println("Invalid game number.");
                 return;
@@ -185,15 +193,21 @@ public class Repl {
             System.out.println("Joined game.");
             ChessGame game = new ChessGame();
             game.getBoard().resetBoard();
-            ChessGame.TeamColor perspective = color.equals("BLACK") ?
-                    ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+            ChessGame.TeamColor perspective =
+                    color.equals("BLACK") ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
             BoardUI.drawBoard(game, perspective);
+        } catch (NumberFormatException e) {
+            System.out.println("Game number must be a number.");
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println(friendlyMessage(e));
         }
     }
 
     private void observeGame(String[] tokens) {
+        if (lastListedGames.isEmpty()) {
+            System.out.println("List games first.");
+            return;
+        }
         if (tokens.length != 2) {
             System.out.println("Usage: observe <game number>");
             return;
@@ -204,13 +218,14 @@ public class Repl {
                 System.out.println("Invalid game number.");
                 return;
             }
-            int gameID = lastListedGames.get(num - 1).gameID();
-            System.out.println("Observing game " + gameID);
+            System.out.println("Observing game.");
             ChessGame game = new ChessGame();
             game.getBoard().resetBoard();
             BoardUI.drawBoard(game, ChessGame.TeamColor.WHITE);
+        } catch (NumberFormatException e) {
+            System.out.println("Game number must be a number.");
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println(friendlyMessage(e));
         }
     }
 
@@ -231,5 +246,28 @@ public class Repl {
             System.out.println("Please enter a valid number.");
             return null;
         }
+    }
+
+    private String friendlyMessage(Exception e) {
+        String msg = e.getMessage();
+        if (msg == null) {
+            return "Something went wrong.";
+        }
+        if (msg.contains("Connection refused")) {
+            return "Could not connect to the server. Make sure the server is running.";
+        }
+        if (msg.contains("Unauthorized")) {
+            return "You are not authorized to do that.";
+        }
+        if (msg.contains("already taken")) {
+            return msg;
+        }
+        if (msg.contains("bad request")) {
+            return "That command could not be completed.";
+        }
+        if (msg.contains("status code")) {
+            return "The request could not be completed.";
+        }
+        return msg;
     }
 }
