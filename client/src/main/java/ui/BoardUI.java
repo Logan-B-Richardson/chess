@@ -57,9 +57,9 @@ public class BoardUI {
     private static void drawSquare(ChessBoard board, int row, int col) {
         boolean lightSquare = ((row + col) % 2 == 0);
         if (lightSquare) {
-            System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
-        } else {
             System.out.print(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+        } else {
+            System.out.print(EscapeSequences.SET_BG_COLOR_WHITE);
         }
         ChessPiece piece = board.getPiece(new chess.ChessPosition(row, col));
         System.out.print(pieceString(piece));

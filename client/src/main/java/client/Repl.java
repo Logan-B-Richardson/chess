@@ -45,7 +45,12 @@ public class Repl {
     }
 
     private boolean handlePrelogin(String input) {
-        String command = input.toLowerCase();
+        if (input.isBlank()) {
+            System.out.println("Unknown command. Type help.");
+            return false;
+        }
+        String[] tokens = input.trim().split("\\s+");
+        String command = tokens[0].toLowerCase();
         switch (command) {
             case "help" -> printPreloginHelp();
             case "quit" -> {
@@ -60,7 +65,11 @@ public class Repl {
     }
 
     private void handlePostlogin(String input) {
-        String[] tokens = input.split(" ");
+        if (input.isBlank()) {
+            System.out.println("Unknown command. Type help.");
+            return;
+        }
+        String[] tokens = input.trim().split("\\s+");
         String command = tokens[0].toLowerCase();
         switch (command) {
             case "create" -> createGame(tokens);
@@ -69,7 +78,7 @@ public class Repl {
             case "observe" -> observeGame(tokens);
             case "logout" -> logout();
             case "help" -> printPostloginHelp();
-            default -> System.out.println("Unknown command.");
+            default -> System.out.println("Unknown command. Type help.");
         }
     }
 
@@ -99,7 +108,8 @@ public class Repl {
             this.loggedIn = true;
             this.authToken = auth.authToken();
             this.username = auth.username();
-            System.out.println("Logged in as " + username);
+            System.out.println("Logged in as " + this.username);
+            lastListedGames.clear();
         } catch (Exception e) {
             System.out.println(friendlyMessage(e));
         }
@@ -117,7 +127,8 @@ public class Repl {
             this.loggedIn = true;
             this.authToken = auth.authToken();
             this.username = auth.username();
-            System.out.println("Registered and logged in as " + username);
+            System.out.println("Registered and logged in as " + this.username);
+            lastListedGames.clear();
         } catch (Exception e) {
             System.out.println(friendlyMessage(e));
         }
@@ -235,6 +246,7 @@ public class Repl {
         if (msg == null) {
             return "Something went wrong.";
         }
+        msg = msg.toLowerCase();
         if (msg.contains("Connection refused")) {
             return "Could not connect to the server. Make sure the server is running.";
         }
@@ -242,7 +254,7 @@ public class Repl {
             return "You are not authorized to do that.";
         }
         if (msg.contains("already taken")) {
-            return msg;
+            return "Something went wrong.";
         }
         if (msg.contains("bad request")) {
             return "That command could not be completed.";
@@ -250,6 +262,6 @@ public class Repl {
         if (msg.contains("status code")) {
             return "The request could not be completed.";
         }
-        return msg;
+        return "Something went wrong.";
     }
 }
