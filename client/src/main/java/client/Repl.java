@@ -214,15 +214,14 @@ public class Repl {
     }
 
     private void observeGame(String[] tokens) {
-        if (lastListedGames.isEmpty()) {
-            System.out.println("List games first.");
-            return;
-        }
-        if (tokens.length != 2) {
-            System.out.println("Usage: observe <game number>");
-            return;
-        }
         try {
+            if (lastListedGames.isEmpty()) {
+                lastListedGames = server.listGames(authToken);
+            }
+            if (tokens.length != 2) {
+                System.out.println("Usage: observe <game number>");
+                return;
+            }
             int num = Integer.parseInt(tokens[1]);
             if (num < 1 || num > lastListedGames.size()) {
                 System.out.println("Invalid game number.");
@@ -246,20 +245,17 @@ public class Repl {
             return "Something went wrong.";
         }
         msg = msg.toLowerCase();
-        if (msg.contains("Connection refused")) {
+        if (msg.contains("connection refused")) {
             return "Could not connect to the server. Make sure the server is running.";
         }
-        if (msg.contains("Unauthorized")) {
+        if (msg.contains("unauthorized")) {
             return "You are not authorized to do that.";
         }
         if (msg.contains("already taken")) {
-            return "Something went wrong.";
+            return "That username or game is already taken.";
         }
         if (msg.contains("bad request")) {
             return "That command could not be completed.";
-        }
-        if (msg.contains("status code")) {
-            return "The request could not be completed.";
         }
         return "Something went wrong.";
     }
