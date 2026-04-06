@@ -257,6 +257,6 @@ public class Repl {
         if (msg.contains("bad request")) {
             return "That command could not be completed.";
         }
-        return "Something went wrong.";
+        return msg;
     }
 }
