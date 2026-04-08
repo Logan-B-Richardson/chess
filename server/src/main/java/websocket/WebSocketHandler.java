@@ -38,7 +38,7 @@ public class WebSocketHandler {
             switch (command.getCommandType()) {
                 case CONNECT -> handleConnect(session, command);
                 case MAKE_MOVE -> handleMakeMove(session, gson.fromJson(message, MakeMoveCommand.class));
-                case LEAVE -> handleleave(session, command);
+                case LEAVE -> handleLeave(session, command);
                 case RESIGN -> handleResign(session, command);
                 default -> sendError(session, "Unsupported command");
             }
