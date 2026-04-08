@@ -12,6 +12,7 @@ import java.util.Scanner;
 public class Repl {
     private final Scanner scanner = new Scanner(System.in);
     private final ServerFacade server;
+    private final WebSocketFacade webSocketClient;
 
     // internal flags
     private boolean loggedIn = false;
@@ -21,6 +22,7 @@ public class Repl {
 
     public Repl(String serverUrl) {
         this.server = new ServerFacade(serverUrl);
+        this.webSocketClient = new WebSocketFacade();
     }
 
     public void run() {
@@ -200,6 +202,7 @@ public class Repl {
             }
             int gameID = lastListedGames.get(num - 1).gameID();
             server.joinGame(authToken, color, gameID);
+            webSocketClient.connect(authToken, gameID);
             System.out.println("Joined game.");
             ChessGame game = new ChessGame();
             game.getBoard().resetBoard();
