@@ -342,4 +342,38 @@ public class Repl {
         perspective = ChessGame.TeamColor.WHITE;
         System.out.println("Left game.");
     }
+
+    private void resignGame() {
+        if (observerMode) {
+            System.out.println("Observers cannot resign.");
+            return;
+        }
+        System.out.print("Are you sure you want to resign? (yes/no): ");
+        String answer = scanner.nextLine().trim().toLowerCase();
+        if (!answer.equals("yes")) {
+            System.out.println("Resign cancelled.");
+            return;
+        }
+        try {
+            webSocketClient.resign(authToken, currentGameID);
+        } catch (Exception e) {
+            System.out.println(friendlyMessage(e));
+        }
+    }
+
+    private void makeMove() {
+        if (observerMode) {
+            System.out.println("Observers cannot make moves.");
+            return;
+        }
+        System.out.println("Move command not implemented yet.");
+    }
+
+    private void highlightMoves() {
+        if (currentGame == null) {
+            System.out.println("No game loaded yet.");
+            return;
+        }
+        System.out.println("Highlight command not implemented yet.");
+    }
 }
