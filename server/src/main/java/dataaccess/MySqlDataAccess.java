@@ -3,13 +3,18 @@ package dataaccess;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import chess.ChessGame;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Collection;
 import org.mindrot.jbcrypt.BCrypt;
+import com.google.gson.Gson;
 
 public class MySqlDataAccess implements DataAccess{
+    private final Gson gson = new Gson();
+
     public MySqlDataAccess() {}
 
     @Override
@@ -112,13 +117,20 @@ public class MySqlDataAccess implements DataAccess{
 
     @Override
     public int createGame(String gamename) {
+        ChessGame game = new ChessGame();
+        game.getBoard().resetBoard();
+        String gameJson = gson.toJson(game);
+
         String sql = """
-                INSERT INTO game (gameName)
-                VALUES (?)
+                INSERT INTO game (whiteUsername, blackUsername, gameName, gameState)
+                VALUES (?, ?, ?, ?)
                 """;
         try (var con = DatabaseManager.getConnection();
             var ps = con.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, gamename);
+            ps.setString(1, null);
+            ps.setString(2, null);
+            ps.setString(3, gamename);
+            ps.setString(4, gameJson);
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
@@ -132,7 +144,7 @@ public class MySqlDataAccess implements DataAccess{
     }
 
     @Override
-    public GameData getGame(int gameid) {
+    public GameData getGame(int gameID) {
         String sql = """
                 SELECT gameID, whiteUsername, blackUsername, gameName
                 FROM game
@@ -140,7 +152,7 @@ public class MySqlDataAccess implements DataAccess{
                 """;
         try (var con = DatabaseManager.getConnection();
             var ps = con.prepareStatement(sql)) {
-            ps.setInt(1, gameid);
+            ps.setInt(1, gameID);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return new GameData(
@@ -161,20 +173,21 @@ public class MySqlDataAccess implements DataAccess{
     @Override
     public Collection<GameData> listGames() {
         String sql = """
-                SELECT gameID, whiteUsername, blackUsername, gameName
+                SELECT gameID, whiteUsername, blackUsername, gameName, gameState
                 FROM game
                 """;
-        var games = new java.util.ArrayList<GameData>();
+        var games = new ArrayList<GameData>();
         try (var con = DatabaseManager.getConnection();
             var ps = con.prepareStatement(sql);
             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
+                ChessGame game = gson.fromJson(rs.getString("gameState"), ChessGame.class);
                 games.add(new GameData(
                         rs.getInt("gameID"),
-                        null,
                         rs.getString("whiteUsername"),
                         rs.getString("blackUsername"),
-                        rs.getString("gameName")
+                        rs.getString("gameName"),
+                        game
                 ));
             }
         } catch (Exception e) {
@@ -187,14 +200,16 @@ public class MySqlDataAccess implements DataAccess{
     public void updateGame(GameData game) {
         String sql = """
                 UPDATE game
-                SET whiteUsername = ?, blackUsername = ?
+                SET whiteUsername = ?, blackUsername = ?, gameName = ?, gameState = ?
                 WHERE gameID = ?
                 """;
         try (var con = DatabaseManager.getConnection();
             var ps = con.prepareStatement(sql)) {
             ps.setString(1, game.whiteusername());
             ps.setString(2, game.blackusername());
-            ps.setInt(3, game.gameid());
+            ps.setString(3, game.gamename());
+            ps.setInt(4, gson.toJson(game.game()));
+            ps.setInt(5, game.gameid());
             ps.executeUpdate();
         } catch (Exception e) {
             throw new RuntimeException(e);
