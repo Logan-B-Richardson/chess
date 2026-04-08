@@ -319,4 +319,12 @@ public class Repl {
         System.out.println("leave - leave the game");
         System.out.println("resign - resign the game");
     }
+
+    private void redrawBoard() {
+        if (currentGame == null) {
+            System.out.println("No game loaded yet.");
+            return;
+        }
+        BoardUI.drawBoard(currentGame, perspective);
+    }
 }
