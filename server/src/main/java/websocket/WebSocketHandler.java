@@ -51,5 +51,28 @@ public class WebSocketHandler {
 
     private static final Set<Session> sessions = ConcurrentHashMap.newKeySet();
 
-    private
+    private void handleConnect(Session session, UserGameCommand command) {
+        try {
+            String authToken = command.getAuthToken();
+            int gameID = command.getGameID();
+            AuthData auth = dao.getAuth(authToken);
+            if (auth == null) {
+                sendError(session, "Error: unauthorized");
+                return;
+            }
+
+            GameData gameData = dao.getGame(gameID);
+            if (gameData == null) {
+                sendError(session, "Error: game not found");
+                return;
+            }
+
+            String username = auth.username();
+            sessions.put(session, new ConnectionData(username, gameID));
+            LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.game());
+            session.getRemote().sendString(gson.toJson(loadGameMessage));
+        } catch (Exception e) {
+            sendError(session, "Error: unable to connect to game");
+        }
+    }
 }
