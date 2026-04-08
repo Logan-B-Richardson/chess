@@ -208,7 +208,7 @@ public class MySqlDataAccess implements DataAccess{
             ps.setString(1, game.whiteusername());
             ps.setString(2, game.blackusername());
             ps.setString(3, game.gamename());
-            ps.setInt(4, gson.toJson(game.game()));
+            ps.setString(4, gson.toJson(game.game()));
             ps.setInt(5, game.gameid());
             ps.executeUpdate();
         } catch (Exception e) {
