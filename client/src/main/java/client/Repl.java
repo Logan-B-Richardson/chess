@@ -327,4 +327,19 @@ public class Repl {
         }
         BoardUI.drawBoard(currentGame, perspective);
     }
+
+    private void leaveGame() {
+        try {
+            webSocketClient.leave(authToken, currentGameID);
+            webSocketClient.close();
+        } catch (Exception e) {
+            System.out.println(friendlyMessage(e));
+        }
+        inGameplay = false;
+        currentGameID = -1;
+        currentGame = null;
+        observerMode = false;
+        perspective = ChessGame.TeamColor.WHITE;
+        System.out.println("Left game.");
+    }
 }
