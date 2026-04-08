@@ -227,11 +227,14 @@ public class Repl {
             }
             int gameID = lastListedGames.get(num - 1).gameID();
             server.joinGame(authToken, color, gameID);
+            currentGameID = gameID;
+            observerMode = false;
+            perspective = color.equals("BLACK") ?
+                    ChessGame.TeamColor.BLACK :
+                    ChessGame.TeamColor.WHITE;
             webSocketClient.connect(authToken, gameID);
+            inGameplay = true;
             System.out.println("Joined game. Waiting for server...");
-            perspective = color.equals("BLACK")
-                    ? ChessGame.TeamColor.BLACK
-                    : ChessGame.TeamColor.WHITE;
         } catch (NumberFormatException e) {
             System.out.println("Game number must be a number.");
         } catch (Exception e) {
