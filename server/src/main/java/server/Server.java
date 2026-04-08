@@ -10,7 +10,7 @@ import service.exceptions.AlreadyTakenException;
 import service.exceptions.BadRequestException;
 import service.exceptions.ForbiddenException;
 import service.exceptions.UnauthorizedException;
-
+import websocket.WebSocketHandler;
 import java.util.Map;
 
 public class Server {
@@ -21,6 +21,17 @@ public class Server {
     public Server() {
         MySqlInitializer.configureDatabase();
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(ctx -> {
+                System.out.println("Connected");
+            });
+            ws.onMessage(ctx -> {
+                System.out.println("Received: " + ctx.message());
+            });
+            ws.onClose(ctx -> {
+                System.out.println("Disconnected");
+            });
+        });
 
         // handler and service setup
         DataAccess dao = new MySqlDataAccess();
