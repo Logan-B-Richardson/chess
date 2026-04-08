@@ -133,10 +133,10 @@ public class DAOTests {
         GameData oldGame = dao.getGame(id);
         GameData updated = new GameData(
                 id,
-                oldGame.game(),
                 "white",
                 "black",
-                oldGame.gamename());
+                oldGame.gamename(),
+                oldGame.game());
         dao.updateGame(updated);
         GameData actual = dao.getGame(id);
         assertEquals("white", actual.whiteusername());
@@ -146,10 +146,10 @@ public class DAOTests {
     @Test
     public void updateGameNegative() {
         GameData fake = new GameData(9999,
-                new ChessGame(),
                 "w",
                 "b",
-                "fake");
+                "fake",
+                new ChessGame());
         assertDoesNotThrow(() -> dao.updateGame(fake));
         assertNull(dao.getGame(9999));
     }

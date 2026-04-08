@@ -64,12 +64,12 @@ public class GameService {
             if (game.whiteusername() != null) {
                 throw new ForbiddenException("already taken");
             }
-            game = new GameData(game.gameid(), game.game(), auth.username(), game.blackusername(), game.gamename());
+            game = new GameData(game.gameid(), auth.username(), game.blackusername(), game.gamename(), game.game());
         } else {
             if (game.blackusername() != null) {
                 throw new ForbiddenException("already taken");
             }
-            game = new GameData(game.gameid(), game.game(), game.whiteusername(), auth.username(), game.gamename());
+            game = new GameData(game.gameid(), game.whiteusername(), auth.username(), game.gamename(), game.game());
         }
         dao.updateGame(game);
     }

@@ -35,14 +35,16 @@ public class DataAccessMemory implements DataAccess {
     // GameData functions
     @Override public int createGame(String gamename) {
         int id = nextid++;
-        GameData game = new GameData(
+        ChessGame game = new ChessGame();
+        game.getBoard().resetBoard();;
+        GameData gameData = new GameData(
                 id,
-                new ChessGame(),
                 null,
                 null,
-                gamename
+                gamename,
+                game
         );
-        games.put(id, game);
+        games.put(id, gameData);
         return id;
     }
     @Override public GameData getGame(int gameid) {

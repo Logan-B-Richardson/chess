@@ -1,6 +1,7 @@
 package dataaccess;
 
 import chess.ChessGame;
+import model.GameData;
 import org.junit.jupiter.api.*;
 import passoff.model.*;
 import passoff.server.TestServerFacade;
@@ -11,6 +12,8 @@ import java.sql.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DatabaseTests {
@@ -131,7 +134,7 @@ public class DatabaseTests {
                 TestResult result = operation.get();
                 Assertions.assertEquals(500, serverFacade.getStatusCode(),
                         "Server response code was not 500 Internal Error for " + operationName);
-                Assertions.assertNotNull(result.getMessage(), "Invalid Request didn't return an error message for " + operationName);
+                assertNotNull(result.getMessage(), "Invalid Request didn't return an error message for " + operationName);
                 Assertions.assertTrue(result.getMessage().toLowerCase(Locale.ROOT).contains("error"),
                         "Error message didn't contain the word \"Error\" for " + operationName);
             }
@@ -140,6 +143,29 @@ public class DatabaseTests {
             loadFromResources.setAccessible(true);
             loadFromResources.invoke(obj);
         }
+    }
+
+    @Test
+    public void testGetGameReturnsBoard() {
+        MySqlDataAccess dao = new MySqlDataAccess();
+
+        int gameID = dao.createGame("test game");
+        GameData gameData = dao.getGame(gameID);
+
+        assertNotNull(gameData);
+        assertNotNull(gameData.game());
+        assertNotNull(gameData.game().getBoard());
+    }
+
+    @Test
+    public void testGetGameStartsWithPieces() {
+        MySqlDataAccess dao = new MySqlDataAccess();
+
+        int gameID = dao.createGame("test game");
+        GameData gameData = dao.getGame(gameID);
+
+        assertNotNull(gameData.game().getBoard().getPiece(new chess.ChessPosition(1, 5)));
+        assertNotNull(gameData.game().getBoard().getPiece(new chess.ChessPosition(8, 5)));
     }
 
     private int getDatabaseRows() {

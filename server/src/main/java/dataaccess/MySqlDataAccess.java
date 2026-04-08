@@ -146,7 +146,7 @@ public class MySqlDataAccess implements DataAccess{
     @Override
     public GameData getGame(int gameID) {
         String sql = """
-                SELECT gameID, whiteUsername, blackUsername, gameName
+                SELECT gameID, whiteUsername, blackUsername, gameName, gameState
                 FROM game
                 WHERE gameID = ?
                 """;
@@ -155,12 +155,13 @@ public class MySqlDataAccess implements DataAccess{
             ps.setInt(1, gameID);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
+                    ChessGame game = gson.fromJson(rs.getString("gameState"), ChessGame.class);
                     return new GameData(
                             rs.getInt("gameID"),
-                            null,
                             rs.getString("whiteUsername"),
                             rs.getString("blackUsername"),
-                            rs.getString("gameName")
+                            rs.getString("gameName"),
+                            game
                     );
                 }
             }

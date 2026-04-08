@@ -25,13 +25,6 @@ public class WebSocketHandler {
         System.out.println("Disconnected");
     }
 
-    @OnOpen
-    public void onOpen(Session session) {
-        System.out.println("Connected");
-        sessions.add(session);
-    }
-
-
 
     private static final Set<Session> sessions = ConcurrentHashMap.newKeySet();
 }
