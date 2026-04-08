@@ -310,4 +310,13 @@ public class Repl {
             default -> System.out.println("Unknown command. Type help.");
         }
     }
+
+    private void printGameplayHelp() {
+        System.out.println("help - show gameplay commands");
+        System.out.println("redraw - redraw the chess board");
+        System.out.println("highlight - highlight legal moves for a piece");
+        System.out.println("move - make a move");
+        System.out.println("leave - leave the game");
+        System.out.println("resign - resign the game");
+    }
 }
