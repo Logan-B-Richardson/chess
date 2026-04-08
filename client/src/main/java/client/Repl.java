@@ -292,4 +292,22 @@ public class Repl {
         }
         return msg;
     }
+
+    private void handleGameplay(String input) {
+        if (input.isBlank()) {
+            System.out.println("Unknown command. Type help.");
+            return;
+        }
+        String[] tokens = input.trim().split("\\s+");
+        String command = tokens[0].toLowerCase();
+        switch (command) {
+            case "help" -> printGameplayHelp();
+            case "redraw" -> redrawBoard();
+            case "highlight" -> highlightMoves();
+            case "move" -> makeMove();
+            case "leave" -> leaveGame();
+            case "resign" -> resignGame();
+            default -> System.out.println("Unknown command. Type help.");
+        }
+    }
 }
