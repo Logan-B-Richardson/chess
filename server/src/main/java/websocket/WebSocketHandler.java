@@ -38,6 +38,8 @@ public class WebSocketHandler {
             switch (command.getCommandType()) {
                 case CONNECT -> handleConnect(session, command);
                 case MAKE_MOVE -> handleMakeMove(session, gson.fromJson(message, MakeMoveCommand.class));
+                case LEAVE -> handleleave(session, command);
+                case RESIGN -> handleResign(session, command);
                 default -> sendError(session, "Unsupported command");
             }
         } catch (Exception e) {
@@ -47,7 +49,7 @@ public class WebSocketHandler {
 
     @OnWebSocketClose
     public void onClose(Session session, int statusCode, String reason) {
-        sessions.remove(session);
+        removeSession(session);
         System.out.println("Disconnected");
     }
 
@@ -151,6 +153,85 @@ public class WebSocketHandler {
         }
     }
 
+    private void handleLeave(Session session, UserGameCommand command) {
+        try {
+            String authToken = command.getAuthToken();
+            int gameID = command.getGameID();
+            AuthData auth = dao.getAuth(authToken);
+            if (auth == null) {
+                sendError(session, "Error: unauthorized");
+                return;
+            }
+            GameData gameData = dao.getGame(gameID);
+            if (gameData == null) {
+                sendError(session, "Error: game not found");
+                return;
+            }
+            String username = auth.username();
+            boolean isWhite = username.equals(gameData.whiteusername());
+            boolean isBlack = username.equals(gameData.blackusername());
+            GameData updatedGame = gameData;
+            if (isWhite) {
+                updatedGame = new GameData(
+                        gameID,
+                        null,
+                        gameData.blackusername(),
+                        gameData.gamename(),
+                        gameData.game()
+                );
+                dao.updateGame(updatedGame);
+            } else if (isBlack) {
+                updatedGame = new GameData(
+                        gameID,
+                        gameData.whiteusername(),
+                        null,
+                        gameData.gamename(),
+                        gameData.game()
+                );
+                dao.updateGame(updatedGame);
+            }
+            removeSession(session);
+            NotificationMessage note = new NotificationMessage(username + " left the game");
+            broadcast(gameID, gson.toJson(note), session);
+        } catch (Exception e) {
+            sendError(session, "Error: failed to leave game");
+        }
+    }
+
+    private void handleResign(Session session, UserGameCommand command) {
+        try {
+            String authToken = command.getAuthToken();
+            int gameID = command.getGameID();
+            AuthData auth = dao.getAuth(authToken);
+            if (auth == null) {
+                sendError(session, "Error: unauthorized");
+                return;
+            }
+            GameData gameData = dao.getGame(gameID);
+            if (gameData == null) {
+                sendError(session, "Error: game not found");
+                return;
+            }
+            String username = auth.username();
+            boolean isWhite = username.equals(gameData.whiteusername());
+            boolean isBlack = username.equals(gameData.blackusername());
+            if (!isWhite && !isBlack) {
+                sendError(session, "Error: observers cannot resign");
+                return;
+            }
+            NotificationMessage note = new NotificationMessage(username + " resigned");
+            String json = gson.toJson(note);
+            for (Session s : sessions.keySet()) {
+                ConnectionData data = sessions.get(s);
+                if (data.gameID() == gameID && s.isOpen()) {
+                    s.getRemote().sendString(json);
+                }
+            }
+        } catch (Exception e) {
+            sendError(session, "Error: failed to resign");
+        }
+    }
+
     private void sendError(Session session, String errorText) {
         try {
             ErrorMessage errorMessage = new ErrorMessage(errorText);
@@ -164,5 +245,9 @@ public class WebSocketHandler {
         char file = (char) ('a' + pos.getColumn() - 1);
         int rank = pos.getRow();
         return "" + file + rank;
+    }
+
+    private void removeSession(Session session) {
+        sessions.remove(session);
     }
 }
