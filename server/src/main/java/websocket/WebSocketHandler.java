@@ -75,4 +75,13 @@ public class WebSocketHandler {
             sendError(session, "Error: unable to connect to game");
         }
     }
+
+    private void sendError(Session session, String errorText) {
+        try {
+            ErrorMessage errorMessage = new ErrorMessage(errorText);
+            session.getRemote().sendString(gson.toJson(errorMessage));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
