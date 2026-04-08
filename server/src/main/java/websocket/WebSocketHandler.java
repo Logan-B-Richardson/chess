@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import dataaccess.MySqlDataAccess;
 import model.AuthData;
 import model.GameData;
+import websocket.commands.MakeMoveCommand;
+import websocket.messages.NotificationMessage;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
@@ -35,6 +37,7 @@ public class WebSocketHandler {
             UserGameCommand command = gson.fromJson(message, UserGameCommand.class);
             switch (command.getCommandType()) {
                 case CONNECT -> handleConnect(session, command);
+                case MAKE_MOVE -> handleMakeMove(session, gson.fromJson(message, MakeMoveCommand.class));
                 default -> sendError(session, "Unsupported command");
             }
         } catch (Exception e) {
@@ -46,6 +49,18 @@ public class WebSocketHandler {
     public void onClose(Session session, int statusCode, String reason) {
         sessions.remove(session);
         System.out.println("Disconnected");
+    }
+
+    private void broadcast(int gameID, String message, Session exclude) {
+        for (var entry : sessions.entrySet()) {
+            Session s = entry.getKey();
+            ConnectionData data = entry.getValue();
+            if (data.gameID() == gameID && s.isOpen() && s != exclude) {
+                try {
+                    s.getRemote().sendString(message);
+                } catch (IOException ignored) {}
+            }
+        }
     }
 
     private void handleConnect(Session session, UserGameCommand command) {
@@ -74,6 +89,68 @@ public class WebSocketHandler {
         }
     }
 
+    private void handleMakeMove(Session session, MakeMoveCommand command) {
+        try {
+            String authToken = command.getAuthToken();
+            int gameID = command.getGameID();
+            AuthData auth = dao.getAuth(authToken);
+            if (auth == null) {
+                sendError(session, "Error: unauthorized");
+                return;
+            }
+            GameData gameData = dao.getGame(gameID);
+            if (gameData == null) {
+                sendError(session, "Error: game not found");
+                return;
+            }
+            var game = gameData.game();
+            var move = command.getMove();
+            String username = auth.username();
+            boolean isWhite = username.equals(gameData.whiteusername());
+            boolean isBlack = username.equals(gameData.blackusername());
+            if (!isWhite && !isBlack) {
+                sendError(session, "Error: observers cannot move");
+                return;
+            }
+            if ((game.getTeamTurn() == chess.ChessGame.TeamColor.WHITE && !isWhite) ||
+                    (game.getTeamTurn() == chess.ChessGame.TeamColor.BLACK && !isBlack)) {
+                sendError(session, "Error: not your turn");
+                return;
+            }
+            try {
+                game.makeMove(move);
+            } catch (Exception e) {
+                sendError(session, "Error: illegal move");
+                return;
+            }
+            GameData updatedGame = new GameData(
+                    gameID,
+                    gameData.whiteusername(),
+                    gameData.blackusername(),
+                    gameData.gamename(),
+                    game
+            );
+            dao.updateGame(updatedGame);
+            LoadGameMessage loadMsg = new LoadGameMessage(game);
+            String loadJson = gson.toJson(loadMsg);
+            for (Session s : sessions.keySet()) {
+                ConnectionData data = sessions.get(s);
+                if (data.gameID() == gameID && s.isOpen()) {
+                    s.getRemote().sendString(loadJson);
+                }
+            }
+            NotificationMessage note = new NotificationMessage(
+                    username + " moved " +
+                            positionToString(move.getStartPosition()) +
+                            " to " +
+                            positionToString(move.getEndPosition())
+            );
+            broadcast(gameID, gson.toJson(note), session);
+        } catch (Exception e) {
+            sendError(session, "Error: failed to make move");
+        }
+    }
+
     private void sendError(Session session, String errorText) {
         try {
             ErrorMessage errorMessage = new ErrorMessage(errorText);
@@ -81,5 +158,11 @@ public class WebSocketHandler {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String positionToString(chess.ChessPosition pos) {
+        char file = (char) ('a' + pos.getColumn() - 1);
+        int rank = pos.getRow();
+        return "" + file + rank;
     }
 }
