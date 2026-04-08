@@ -22,7 +22,23 @@ public class Repl {
 
     public Repl(String serverUrl) {
         this.server = new ServerFacade(serverUrl);
-        this.webSocketClient = new WebSocketFacade();
+        this.webSocketClient = new WebSocketFacade(new WebSocketListener() {
+            @Override
+            public void onLoadGame(ChessGame game) {
+                System.out.println("Received game from server");
+                BoardUI.drawBoard(game, ChessGame.TeamColor.WHITE);
+            }
+
+            @Override
+            public void onError(String message) {
+                System.out.println(message);
+            }
+
+            @Override
+            public void onNotification(String message) {
+                System.out.println(message);
+            }
+        });
     }
 
     public void run() {

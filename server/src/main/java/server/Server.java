@@ -20,17 +20,12 @@ public class Server {
 
     public Server() {
         MySqlInitializer.configureDatabase();
+        WebSocketHandler webSocketHandler = new WebSocketHandler();
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         javalin.ws("/ws", ws -> {
-            ws.onConnect(ctx -> {
-                System.out.println("Connected");
-            });
-            ws.onMessage(ctx -> {
-                System.out.println("Received: " + ctx.message());
-            });
-            ws.onClose(ctx -> {
-                System.out.println("Disconnected");
-            });
+            ws.onConnect(ctx -> webSocketHandler.onConnect(ctx.session));
+            ws.onMessage(ctx -> webSocketHandler.onMessage(ctx.session, ctx.message()));
+            ws.onClose(ctx -> webSocketHandler.onClose(ctx.session, ctx.status(), ctx.reason()));
         });
 
         // handler and service setup

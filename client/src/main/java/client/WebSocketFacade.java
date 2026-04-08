@@ -14,6 +14,11 @@ import java.net.URI;
 public class WebSocketFacade {
     private final Gson gson = new Gson();
     private Session session;
+    private WebSocketListener listener;
+
+    public WebSocketFacade(WebSocketListener listener) {
+        this.listener = listener;
+    }
 
     public void connect(String authToken, int gameID) throws Exception {
         if (session != null && session.isOpen()) {
@@ -28,7 +33,24 @@ public class WebSocketFacade {
 
     @OnMessage
     public void onMessage(String message) {
-        System.out.println("WS message: " + message);
+        try {
+            var base = gson.fromJson(message, websocket.messages.ServerMessage.class);
+            switch (base.getServerMessageType()) {
+                case LOAD_GAME -> {
+                    var loadMsg = gson.fromJson(message, websocket.messages.LoadGameMessage.class);
+                    listener.onLoadGame(loadMsg.getGame());
+                }
+                case ERROR -> {
+                    var err = gson.fromJson(message, websocket.messages.ErrorMessage.class);
+                    listener.onError(err.getErrorMessage());
+                }
+                case NOTIFICATION -> {
+                    var note = gson.fromJson(message, websocket.messages.NotificationMessage.class);
+                    listener.onNotification(note.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Failed to parse WS message: " + message);
+        }
     }
-
 }

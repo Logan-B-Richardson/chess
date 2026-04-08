@@ -15,7 +15,6 @@ import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
@@ -45,11 +44,9 @@ public class WebSocketHandler {
 
     @OnWebSocketClose
     public void onClose(Session session, int statusCode, String reason) {
+        sessions.remove(session);
         System.out.println("Disconnected");
     }
-
-
-    private static final Set<Session> sessions = ConcurrentHashMap.newKeySet();
 
     private void handleConnect(Session session, UserGameCommand command) {
         try {
@@ -71,6 +68,7 @@ public class WebSocketHandler {
             sessions.put(session, new ConnectionData(username, gameID));
             LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.game());
             session.getRemote().sendString(gson.toJson(loadGameMessage));
+            System.out.println("handleConnect called for game " + gameID);
         } catch (Exception e) {
             sendError(session, "Error: unable to connect to game");
         }
