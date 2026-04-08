@@ -26,6 +26,9 @@ public class WebSocketFacade {
         if (session != null && session.isOpen()) {
             return;
         }
+        if (session == null || !session.isOpen()) {
+            throw new IllegalStateException("WebSocket is not connected.");
+        }
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         session = container.connectToServer(this, URI.create("ws://localhost:8080/ws"));
         UserGameCommand connectCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
@@ -34,12 +37,18 @@ public class WebSocketFacade {
     }
 
     public void makeMove(String authToken, int gameID, ChessMove move) throws Exception {
+        if (session == null || !session.isOpen()) {
+            throw new IllegalStateException("WebSocket is not connected.");
+        }
         MakeMoveCommand command = new MakeMoveCommand(authToken, gameID, move);
         String json = gson.toJson(command);
         session.getBasicRemote().sendText(json);
     }
 
     public void leave(String authToken, int gameID) throws Exception {
+        if (session == null || !session.isOpen()) {
+            throw new IllegalStateException("WebSocket is not connected.");
+        }
         UserGameCommand command =
                 new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID);
         String json = gson.toJson(command);
@@ -47,6 +56,9 @@ public class WebSocketFacade {
     }
 
     public void resign(String authToken, int gameID) throws Exception {
+        if (session == null || !session.isOpen()) {
+            throw new IllegalStateException("WebSocket is not connected.");
+        }
         UserGameCommand command =
                 new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID);
         String json = gson.toJson(command);
@@ -54,6 +66,9 @@ public class WebSocketFacade {
     }
 
     public void close() throws Exception {
+        if (session == null || !session.isOpen()) {
+            throw new IllegalStateException("WebSocket is not connected.");
+        }
         if (session != null && session.isOpen()) {
             session.close();
         }
