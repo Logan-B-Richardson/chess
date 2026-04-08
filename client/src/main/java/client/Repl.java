@@ -295,6 +295,12 @@ public class Repl {
         if (msg.contains("bad request")) {
             return "That command could not be completed.";
         }
+        if (msg.contains("invalid position")) {
+            return "Invalid position. Use format like e2.";
+        }
+        if (msg.contains("promotion")) {
+            return "Invalid promotion piece. Use Q, R, B, or N.";
+        }
         return msg;
     }
 
