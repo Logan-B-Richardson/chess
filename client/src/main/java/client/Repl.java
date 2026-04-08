@@ -20,13 +20,17 @@ public class Repl {
     private String username = null;
     private List<GameSummary> lastListedGames = new ArrayList<>();
     private ChessGame.TeamColor perspective = ChessGame.TeamColor.WHITE;
+    private boolean inGameplay = false;
+    private int currentGameID = -1;
+    private ChessGame currentGame = null;
+    private boolean observerMode = false;
 
     public Repl(String serverUrl) {
         this.server = new ServerFacade(serverUrl);
         this.webSocketClient = new WebSocketFacade(new WebSocketListener() {
             @Override
             public void onLoadGame(ChessGame game) {
-                System.out.println("Received game from server");
+                currentGame = game;
                 BoardUI.drawBoard(game, perspective);
             }
 
@@ -52,6 +56,10 @@ public class Repl {
                     if (handlePrelogin(input)) {
                         break;
                     }
+                } else if (inGameplay) {
+                    System.out.print("[GAMEPLAY] >>> ");
+                    String input = scanner.nextLine().trim();
+                    handleGameplay(input);
                 } else {
                     System.out.print("[LOGGED_IN] >>> ");
                     String input = scanner.nextLine().trim();
