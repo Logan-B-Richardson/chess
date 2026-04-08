@@ -26,9 +26,6 @@ public class WebSocketFacade {
         if (session != null && session.isOpen()) {
             return;
         }
-        if (session == null || !session.isOpen()) {
-            throw new IllegalStateException("WebSocket is not connected.");
-        }
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         session = container.connectToServer(this, URI.create("ws://localhost:8080/ws"));
         UserGameCommand connectCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
@@ -66,9 +63,6 @@ public class WebSocketFacade {
     }
 
     public void close() throws Exception {
-        if (session == null || !session.isOpen()) {
-            throw new IllegalStateException("WebSocket is not connected.");
-        }
         if (session != null && session.isOpen()) {
             session.close();
         }
