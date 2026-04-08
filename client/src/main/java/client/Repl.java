@@ -2,12 +2,17 @@ package client;
 
 import service.records.GameSummary;
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import ui.BoardUI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Collection;
+import java.util.HashSet;
 
 public class Repl {
     private final Scanner scanner = new Scanner(System.in);
@@ -263,7 +268,6 @@ public class Repl {
             webSocketClient.connect(authToken, gameID);
             inGameplay = true;
             System.out.println("Observing game. Waiting for server...");
-            webSocketClient.connect(authToken, gameID);
         } catch (NumberFormatException e) {
             System.out.println("Game number must be a number.");
         } catch (Exception e) {
@@ -374,6 +378,41 @@ public class Repl {
             System.out.println("No game loaded yet.");
             return;
         }
-        System.out.println("Highlight command not implemented yet.");
+        try {
+            System.out.print("Enter piece position (e.g. e2): ");
+            String input = scanner.nextLine().trim();
+            ChessPosition start = parsePosition(input);
+            ChessPiece piece = currentGame.getBoard().getPiece(start);
+            if (piece == null) {
+                System.out.println("No piece at that position.");
+                return;
+            }
+            Collection<ChessMove> legalMoves = currentGame.validMoves(start);
+            Collection<ChessPosition> highlights = new HashSet<>();
+            highlights.add(start);
+            if (legalMoves != null) {
+                for (ChessMove move : legalMoves) {
+                    highlights.add(move.getEndPosition());
+                }
+            }
+            BoardUI.drawBoard(currentGame, perspective, highlights);
+        } catch (Exception e) {
+            System.out.println(friendlyMessage(e));
+        }
+    }
+
+    private ChessPosition parsePosition(String input) {
+        input = input.trim().toLowerCase();
+        if (input.length() != 2) {
+            throw new IllegalArgumentException("Invalid position. Use format like e2.");
+        }
+        char file = input.charAt(0);
+        char rank = input.charAt(1);
+        if (file < 'a' || file > 'h' || rank < '1' || rank > '8') {
+            throw new IllegalArgumentException("Invalid position. Use format like e2.");
+        }
+        int col = file - 'a' + 1;
+        int row = rank - '0';
+        return new ChessPosition(row, col);
     }
 }
