@@ -257,7 +257,11 @@ public class Repl {
                 return;
             }
             int gameID = lastListedGames.get(num - 1).gameID();
+            currentGameID = gameID;
+            observerMode = true;
             perspective = ChessGame.TeamColor.WHITE;
+            webSocketClient.connect(authToken, gameID);
+            inGameplay = true;
             System.out.println("Observing game. Waiting for server...");
             webSocketClient.connect(authToken, gameID);
         } catch (NumberFormatException e) {
