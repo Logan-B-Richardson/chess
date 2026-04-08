@@ -4,6 +4,7 @@ import service.records.GameSummary;
 import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPiece;
+import chess.ChessPiece.PieceType;
 import chess.ChessPosition;
 import ui.BoardUI;
 
@@ -370,7 +371,30 @@ public class Repl {
             System.out.println("Observers cannot make moves.");
             return;
         }
-        System.out.println("Move command not implemented yet.");
+        if (currentGame == null) {
+            System.out.println("No game loaded yet.");
+            return;
+        }
+        try {
+            System.out.print("Enter start position (e.g. e2): ");
+            ChessPosition start = parsePosition(scanner.nextLine().trim());
+            System.out.print("Enter end position (e.g. e4): ");
+            ChessPosition end = parsePosition(scanner.nextLine().trim());
+            ChessPiece piece = currentGame.getBoard().getPiece(start);
+            if (piece == null) {
+                System.out.println("No piece at that starting position.");
+                return;
+            }
+            PieceType promotionPiece = null;
+            if (isPromotionMove(piece, end)) {
+                System.out.print("Promote to (Q, R, B, N): ");
+                promotionPiece = parsePromotionPiece(scanner.nextLine().trim());
+            }
+            ChessMove move = new ChessMove(start, end, promotionPiece);
+            webSocketClient.makeMove(authToken, currentGameID, move);
+        } catch (Exception e) {
+            System.out.println(friendlyMessage(e));
+        }
     }
 
     private void highlightMoves() {
@@ -414,5 +438,24 @@ public class Repl {
         int col = file - 'a' + 1;
         int row = rank - '0';
         return new ChessPosition(row, col);
+    }
+
+    private PieceType parsePromotionPiece(String input) {
+        input = input.trim().toUpperCase();
+        return switch (input) {
+            case "Q", "QUEEN" -> PieceType.QUEEN;
+            case "R", "ROOK" -> PieceType.ROOK;
+            case "B", "BISHOP" -> PieceType.BISHOP;
+            case "N", "KNIGHT" -> PieceType.KNIGHT;
+            default -> throw new IllegalArgumentException("Invalid promotion piece. Use Q, R, B, or N.");
+        };
+    }
+
+    private boolean isPromotionMove(ChessPiece piece, ChessPosition endPosition) {
+        if (piece == null || piece.getPieceType() != PieceType.PAWN) {
+            return false;
+        }
+        return (piece.getTeamColor() == ChessGame.TeamColor.WHITE && endPosition.getRow() == 8) ||
+                (piece.getTeamColor() == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1);
     }
 }
