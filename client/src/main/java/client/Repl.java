@@ -19,6 +19,7 @@ public class Repl {
     private String authToken = null;
     private String username = null;
     private List<GameSummary> lastListedGames = new ArrayList<>();
+    private ChessGame.TeamColor perspective = ChessGame.TeamColor.WHITE;
 
     public Repl(String serverUrl) {
         this.server = new ServerFacade(serverUrl);
@@ -26,7 +27,7 @@ public class Repl {
             @Override
             public void onLoadGame(ChessGame game) {
                 System.out.println("Received game from server");
-                BoardUI.drawBoard(game, ChessGame.TeamColor.WHITE);
+                BoardUI.drawBoard(game, perspective);
             }
 
             @Override
@@ -219,12 +220,11 @@ public class Repl {
             int gameID = lastListedGames.get(num - 1).gameID();
             server.joinGame(authToken, color, gameID);
             webSocketClient.connect(authToken, gameID);
-            System.out.println("Joined game.");
-            ChessGame game = new ChessGame();
-            game.getBoard().resetBoard();
-            ChessGame.TeamColor perspective =
-                    color.equals("BLACK") ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
-            BoardUI.drawBoard(game, perspective);
+            System.out.println("Joined game. Waiting for server...");
+            webSocketClient.connect(authToken, gameID);
+            perspective = color.equals("BLACK")
+                    ? ChessGame.TeamColor.BLACK
+                    : ChessGame.TeamColor.WHITE;
         } catch (NumberFormatException e) {
             System.out.println("Game number must be a number.");
         } catch (Exception e) {
@@ -246,10 +246,10 @@ public class Repl {
                 System.out.println("Invalid game number.");
                 return;
             }
-            System.out.println("Observing game.");
-            ChessGame game = new ChessGame();
-            game.getBoard().resetBoard();
-            BoardUI.drawBoard(game, ChessGame.TeamColor.WHITE);
+            int gameID = lastListedGames.get(num - 1).gameID();
+            perspective = ChessGame.TeamColor.WHITE;
+            System.out.println("Observing game. Waiting for server...");
+            webSocketClient.connect(authToken, gameID);
         } catch (NumberFormatException e) {
             System.out.println("Game number must be a number.");
         } catch (Exception e) {
