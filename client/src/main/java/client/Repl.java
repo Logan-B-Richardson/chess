@@ -221,7 +221,6 @@ public class Repl {
             server.joinGame(authToken, color, gameID);
             webSocketClient.connect(authToken, gameID);
             System.out.println("Joined game. Waiting for server...");
-            webSocketClient.connect(authToken, gameID);
             perspective = color.equals("BLACK")
                     ? ChessGame.TeamColor.BLACK
                     : ChessGame.TeamColor.WHITE;
