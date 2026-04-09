@@ -161,7 +161,7 @@ public class WebSocketHandler {
             dao.updateGame(updatedGame);
             LoadGameMessage loadMsg = new LoadGameMessage(game);
             String loadJson = gson.toJson(loadMsg);
-            broadcastToGame(gameID, loadJson);
+            broadcast(gameID, loadJson, null);
             NotificationMessage note = new NotificationMessage(
                     username + " moved " +
                             positionToString(move.getStartPosition()) +
@@ -191,21 +191,18 @@ public class WebSocketHandler {
             String username = auth.username();
             boolean isWhite = username.equals(gameData.whiteusername());
             boolean isBlack = username.equals(gameData.blackusername());
-            GameData updatedGame = gameData;
+            String newWhite = gameData.whiteusername();
+            String newBlack = gameData.blackusername();
             if (isWhite) {
-                updatedGame = new GameData(
-                        gameID,
-                        null,
-                        gameData.blackusername(),
-                        gameData.gamename(),
-                        gameData.game()
-                );
-                dao.updateGame(updatedGame);
+                newWhite = null;
             } else if (isBlack) {
-                updatedGame = new GameData(
+                newBlack = null;
+            }
+            if (isWhite || isBlack) {
+                GameData updatedGame = new GameData(
                         gameID,
-                        gameData.whiteusername(),
-                        null,
+                        newWhite,
+                        newBlack,
                         gameData.gamename(),
                         gameData.game()
                 );
@@ -255,7 +252,7 @@ public class WebSocketHandler {
             dao.updateGame(updatedGame);
             NotificationMessage note = new NotificationMessage(username + " resigned");
             String json = gson.toJson(note);
-            broadcastToGame(gameID, json);
+            broadcast(gameID, json, null);
         } catch (Exception e) {
             sendError(session, "Error: failed to resign");
         }
@@ -288,16 +285,5 @@ public class WebSocketHandler {
                 game.isInStalemate(chess.ChessGame.TeamColor.WHITE) ||
                 game.isInStalemate(chess.ChessGame.TeamColor.BLACK) ||
                 (name != null && name.endsWith("_OVER"));
-    }
-
-    private void broadcastToGame(int gameID, String message) {
-        for (Session s : SESSIONS.keySet()) {
-            ConnectionData data = SESSIONS.get(s);
-            if (data.gameID() == gameID && s.isOpen()) {
-                try {
-                    s.getRemote().sendString(message);
-                } catch (IOException ignored) {}
-            }
-        }
     }
 }
