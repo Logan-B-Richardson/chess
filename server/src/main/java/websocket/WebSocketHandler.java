@@ -134,17 +134,27 @@ public class WebSocketHandler {
             }
             try {
                 game.makeMove(move);
-                if (game.isInCheckmate(chess.ChessGame.TeamColor.WHITE) ||
-                        game.isInCheckmate(chess.ChessGame.TeamColor.BLACK)) {
-                    NotificationMessage note = new NotificationMessage("Checkmate!");
+                String whiteName = gameData.whiteusername();
+                String blackName = gameData.blackusername();
+                if (game.isInCheckmate(chess.ChessGame.TeamColor.WHITE)) {
+                    NotificationMessage note = new NotificationMessage(
+                            whiteName + " is in checkmate");
                     broadcast(gameID, gson.toJson(note), null);
-                } else if (game.isInStalemate(chess.ChessGame.TeamColor.WHITE) ||
-                        game.isInStalemate(chess.ChessGame.TeamColor.BLACK)) {
+                } else if (game.isInCheckmate(chess.ChessGame.TeamColor.BLACK)) {
+                    NotificationMessage note = new NotificationMessage(
+                            blackName + " is in checkmate");
+                    broadcast(gameID, gson.toJson(note), null);
+                } else if (game.isInStalemate(chess.ChessGame.TeamColor.WHITE)
+                        || game.isInStalemate(chess.ChessGame.TeamColor.BLACK)) {
                     NotificationMessage note = new NotificationMessage("Stalemate!");
                     broadcast(gameID, gson.toJson(note), null);
-                } else if (game.isInCheck(chess.ChessGame.TeamColor.WHITE) ||
-                        game.isInCheck(chess.ChessGame.TeamColor.BLACK)) {
-                    NotificationMessage note = new NotificationMessage("Check!");
+                } else if (game.isInCheck(chess.ChessGame.TeamColor.WHITE)) {
+                    NotificationMessage note = new NotificationMessage(
+                            whiteName + " is in check");
+                    broadcast(gameID, gson.toJson(note), null);
+                } else if (game.isInCheck(chess.ChessGame.TeamColor.BLACK)) {
+                    NotificationMessage note = new NotificationMessage(
+                            blackName + " is in check");
                     broadcast(gameID, gson.toJson(note), null);
                 }
             } catch (Exception e) {
