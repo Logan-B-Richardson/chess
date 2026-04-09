@@ -176,21 +176,15 @@ public class WebSocketHandler {
 
     private void handleLeave(Session session, UserGameCommand command) {
         try {
-            String authToken = command.getAuthToken();
             int gameID = command.getGameID();
-            AuthData auth = dao.getAuth(authToken);
-            if (auth == null) {
-                sendError(session, "Error: unauthorized");
+            CommandContext ctx = getCommandContext(session, command);
+            if (ctx == null) {
                 return;
             }
-            GameData gameData = dao.getGame(gameID);
-            if (gameData == null) {
-                sendError(session, "Error: game not found");
-                return;
-            }
-            String username = auth.username();
-            boolean isWhite = username.equals(gameData.whiteusername());
-            boolean isBlack = username.equals(gameData.blackusername());
+            GameData gameData = ctx.gameData();
+            String username = ctx.username();
+            boolean isWhite = ctx.isWhite();
+            boolean isBlack = ctx.isBlack();
             String newWhite = gameData.whiteusername();
             String newBlack = gameData.blackusername();
             if (isWhite) {
@@ -218,21 +212,15 @@ public class WebSocketHandler {
 
     private void handleResign(Session session, UserGameCommand command) {
         try {
-            String authToken = command.getAuthToken();
             int gameID = command.getGameID();
-            AuthData auth = dao.getAuth(authToken);
-            if (auth == null) {
-                sendError(session, "Error: unauthorized");
+            CommandContext ctx = getCommandContext(session, command);
+            if (ctx == null) {
                 return;
             }
-            GameData gameData = dao.getGame(gameID);
-            if (gameData == null) {
-                sendError(session, "Error: game not found");
-                return;
-            }
-            String username = auth.username();
-            boolean isWhite = username.equals(gameData.whiteusername());
-            boolean isBlack = username.equals(gameData.blackusername());
+            GameData gameData = ctx.gameData();
+            String username = ctx.username();
+            boolean isWhite = ctx.isWhite();
+            boolean isBlack = ctx.isBlack();
             if (!isWhite && !isBlack) {
                 sendError(session, "Error: observers cannot resign");
                 return;
@@ -251,8 +239,7 @@ public class WebSocketHandler {
             );
             dao.updateGame(updatedGame);
             NotificationMessage note = new NotificationMessage(username + " resigned");
-            String json = gson.toJson(note);
-            broadcast(gameID, json, null);
+            broadcast(gameID, gson.toJson(note), null);
         } catch (Exception e) {
             sendError(session, "Error: failed to resign");
         }
@@ -285,5 +272,26 @@ public class WebSocketHandler {
                 game.isInStalemate(chess.ChessGame.TeamColor.WHITE) ||
                 game.isInStalemate(chess.ChessGame.TeamColor.BLACK) ||
                 (name != null && name.endsWith("_OVER"));
+    }
+
+    private record CommandContext(AuthData auth, GameData gameData, String username, boolean isWhite, boolean isBlack) {}
+
+    private CommandContext getCommandContext(Session session, UserGameCommand command) {
+        String authToken = command.getAuthToken();
+        int gameID = command.getGameID();
+        AuthData auth = dao.getAuth(authToken);
+        if (auth == null) {
+            sendError(session, "Error: unauthorized");
+            return null;
+        }
+        GameData gameData = dao.getGame(gameID);
+        if (gameData == null) {
+            sendError(session, "Error: game not found");
+            return null;
+        }
+        String username = auth.username();
+        boolean isWhite = username.equals(gameData.whiteusername());
+        boolean isBlack = username.equals(gameData.blackusername());
+        return new CommandContext(auth, gameData, username, isWhite, isBlack);
     }
 }
