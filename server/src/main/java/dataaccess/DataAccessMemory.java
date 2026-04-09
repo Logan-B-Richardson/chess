@@ -3,6 +3,8 @@ package dataaccess;
 import chess.ChessGame;
 import io.javalin.http.UseProxyResponse;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
+
 import java.util.*;
 
 public class DataAccessMemory implements DataAccess {
@@ -17,8 +19,14 @@ public class DataAccessMemory implements DataAccess {
     @Override public UserData getUser(String username) {
         return users.get(username);
     }
-    @Override public void createUser(UserData user) {
-        users.put(user.username(), user);
+    @Override
+    public void createUser(UserData user) {
+        String hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());
+        users.put(user.username(), new UserData(
+                user.username(),
+                hashedPassword,
+                user.email()
+        ));
     }
 
     // AuthData functions

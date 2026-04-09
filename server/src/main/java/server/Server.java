@@ -30,7 +30,6 @@ public class Server {
 
         // handler and service setup
         DataAccess dao = new MySqlDataAccess();
-        dao.clear();
         UserService userService = new UserService(dao);
         GameService gameService = new GameService(dao);
         ClearService clearService = new ClearService(dao);
