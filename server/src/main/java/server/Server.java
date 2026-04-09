@@ -23,7 +23,7 @@ public class Server {
         WebSocketHandler webSocketHandler = new WebSocketHandler();
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         javalin.ws("/ws", ws -> {
-            ws.onConnect(ctx -> webSocketHandler.onConnect(ctx.session));
+            ws.onConnect(ctx -> webSocketHandler.onConnect(ctx));
             ws.onMessage(ctx -> webSocketHandler.onMessage(ctx.session, ctx.message()));
             ws.onClose(ctx -> webSocketHandler.onClose(ctx.session, ctx.status(), ctx.reason()));
         });

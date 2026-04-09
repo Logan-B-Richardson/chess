@@ -2,6 +2,7 @@ package websocket;
 
 import com.google.gson.Gson;
 import dataaccess.MySqlDataAccess;
+import io.javalin.websocket.WsConnectContext;
 import model.AuthData;
 import model.GameData;
 import websocket.commands.MakeMoveCommand;
@@ -27,8 +28,10 @@ public class WebSocketHandler {
     private record ConnectionData(String username, int gameID) {}
 
     @OnWebSocketConnect
-    public void onConnect(Session session) {
-        System.out.println("Connected");
+    public void onConnect(WsConnectContext ctx) {
+        ctx.enableAutomaticPings();
+        System.out.println("Connected: enabled automatic pings");
+
     }
 
     @OnWebSocketMessage
