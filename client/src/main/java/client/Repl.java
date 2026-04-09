@@ -341,6 +341,7 @@ public class Repl {
 
     private void leaveGame() {
         try {
+            ensureWebSocketConnected();
             webSocketClient.leave(authToken, currentGameID);
             webSocketClient.close();
         } catch (Exception e) {
@@ -366,6 +367,7 @@ public class Repl {
             return;
         }
         try {
+            ensureWebSocketConnected();
             webSocketClient.resign(authToken, currentGameID);
         } catch (Exception e) {
             System.out.println(friendlyMessage(e));
@@ -397,10 +399,7 @@ public class Repl {
                 promotionPiece = parsePromotionPiece(scanner.nextLine().trim());
             }
             ChessMove move = new ChessMove(start, end, promotionPiece);
-            if (!webSocketClient.isConnected()) {
-                System.out.println("Reconnecting websocket...");
-                webSocketClient.connect(authToken, currentGameID);
-            }
+            ensureWebSocketConnected();
             webSocketClient.makeMove(authToken, currentGameID, move);
         } catch (Exception e) {
             System.out.println(friendlyMessage(e));
@@ -467,5 +466,12 @@ public class Repl {
         }
         return (piece.getTeamColor() == ChessGame.TeamColor.WHITE && endPosition.getRow() == 8) ||
                 (piece.getTeamColor() == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1);
+    }
+
+    private void ensureWebSocketConnected() throws Exception {
+        if (!webSocketClient.isConnected()) {
+            System.out.println("Reconnecting websocket...");
+            webSocketClient.connect(authToken, currentGameID);
+        }
     }
 }

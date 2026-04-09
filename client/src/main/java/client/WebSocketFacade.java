@@ -22,6 +22,7 @@ public class WebSocketFacade {
     private final String wsUrl;
     private Session session;
     private WebSocketListener listener;
+    private int connectedGameID = -1;
 
     public WebSocketFacade(String serverUrl, WebSocketListener listener) {
         this.listener = listener;
@@ -36,6 +37,8 @@ public class WebSocketFacade {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         System.out.println("Connecting to " + wsUrl);
         session = container.connectToServer(this, URI.create(wsUrl));
+        connectedGameID = gameID;
+        System.out.println("WebSocket connected for game " + connectedGameID);
         System.out.println("Session open after connect: " + session.isOpen());
         UserGameCommand connectCommand =
                 new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
@@ -113,11 +116,13 @@ public class WebSocketFacade {
     public void onClose(Session session, CloseReason reason) {
         System.out.println("WebSocket closed: " + reason);
         this.session = null;
+        this.connectedGameID = -1;
     }
 
     @OnError
     public void onError(Session session, Throwable throwable) {
         System.out.println("WebSocket error: " + throwable.getMessage());
+        this.session = null;
     }
 
     public boolean isConnected() {
