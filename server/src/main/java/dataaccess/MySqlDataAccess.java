@@ -182,6 +182,7 @@ public class MySqlDataAccess implements DataAccess{
              var ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
+                System.out.println("listGames reached row " + rs.getInt("gameID"));
                 games.add(new GameData(
                         rs.getInt("gameID"),
                         rs.getString("whiteUsername"),

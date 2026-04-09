@@ -115,7 +115,10 @@ public class WebSocketHandler {
                 return;
             }
             var game = gameData.game();
-            if (game.isGameOver()) {
+            if (game.isInCheckmate(chess.ChessGame.TeamColor.WHITE) ||
+                    game.isInCheckmate(chess.ChessGame.TeamColor.BLACK) ||
+                    game.isInStalemate(chess.ChessGame.TeamColor.WHITE) ||
+                    game.isInStalemate(chess.ChessGame.TeamColor.BLACK)) {
                 sendError(session, "Error: game is already over");
                 return;
             }
@@ -136,12 +139,10 @@ public class WebSocketHandler {
                 game.makeMove(move);
                 if (game.isInCheckmate(chess.ChessGame.TeamColor.WHITE) ||
                         game.isInCheckmate(chess.ChessGame.TeamColor.BLACK)) {
-                    game.setGameOver(true);
                     NotificationMessage note = new NotificationMessage("Checkmate!");
                     broadcast(gameID, gson.toJson(note), null);
                 } else if (game.isInStalemate(chess.ChessGame.TeamColor.WHITE) ||
                         game.isInStalemate(chess.ChessGame.TeamColor.BLACK)) {
-                    game.setGameOver(true);
                     NotificationMessage note = new NotificationMessage("Stalemate!");
                     broadcast(gameID, gson.toJson(note), null);
                 } else if (game.isInCheck(chess.ChessGame.TeamColor.WHITE) ||
@@ -248,11 +249,13 @@ public class WebSocketHandler {
                 return;
             }
             var game = gameData.game();
-            if (game.isGameOver()) {
+            if (game.isInCheckmate(chess.ChessGame.TeamColor.WHITE) ||
+                    game.isInCheckmate(chess.ChessGame.TeamColor.BLACK) ||
+                    game.isInStalemate(chess.ChessGame.TeamColor.WHITE) ||
+                    game.isInStalemate(chess.ChessGame.TeamColor.BLACK)) {
                 sendError(session, "Error: game is already over");
                 return;
             }
-            game.setGameOver(true);
             GameData updatedGame = new GameData(
                     gameID,
                     gameData.whiteusername(),
