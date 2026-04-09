@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WebSocketHandler {
     private final Gson gson = new Gson();
     private final MySqlDataAccess dao = new MySqlDataAccess();
-    private static final Map<Session, ConnectionData> sessions = new ConcurrentHashMap<>();
+    private static final Map<Session, ConnectionData> SESSIONS = new ConcurrentHashMap<>();
     private record ConnectionData(String username, int gameID) {}
 
     @OnWebSocketConnect
@@ -54,7 +54,7 @@ public class WebSocketHandler {
     }
 
     private void broadcast(int gameID, String message, Session exclude) {
-        for (var entry : sessions.entrySet()) {
+        for (var entry : SESSIONS.entrySet()) {
             Session s = entry.getKey();
             ConnectionData data = entry.getValue();
             if (data.gameID() == gameID && s.isOpen() && s != exclude) {
@@ -82,7 +82,7 @@ public class WebSocketHandler {
             }
 
             String username = auth.username();
-            sessions.put(session, new ConnectionData(username, gameID));
+            SESSIONS.put(session, new ConnectionData(username, gameID));
             LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.game());
             session.getRemote().sendString(gson.toJson(loadGameMessage));
             String role;
@@ -161,12 +161,7 @@ public class WebSocketHandler {
             dao.updateGame(updatedGame);
             LoadGameMessage loadMsg = new LoadGameMessage(game);
             String loadJson = gson.toJson(loadMsg);
-            for (Session s : sessions.keySet()) {
-                ConnectionData data = sessions.get(s);
-                if (data.gameID() == gameID && s.isOpen()) {
-                    s.getRemote().sendString(loadJson);
-                }
-            }
+            broadcastToGame(gameID, loadJson);
             NotificationMessage note = new NotificationMessage(
                     username + " moved " +
                             positionToString(move.getStartPosition()) +
@@ -260,12 +255,7 @@ public class WebSocketHandler {
             dao.updateGame(updatedGame);
             NotificationMessage note = new NotificationMessage(username + " resigned");
             String json = gson.toJson(note);
-            for (Session s : sessions.keySet()) {
-                ConnectionData data = sessions.get(s);
-                if (data.gameID() == gameID && s.isOpen()) {
-                    s.getRemote().sendString(json);
-                }
-            }
+            broadcastToGame(gameID, json);
         } catch (Exception e) {
             sendError(session, "Error: failed to resign");
         }
@@ -287,7 +277,7 @@ public class WebSocketHandler {
     }
 
     private void removeSession(Session session) {
-        sessions.remove(session);
+        SESSIONS.remove(session);
     }
 
     private boolean isGameOver(GameData gameData) {
@@ -298,5 +288,16 @@ public class WebSocketHandler {
                 game.isInStalemate(chess.ChessGame.TeamColor.WHITE) ||
                 game.isInStalemate(chess.ChessGame.TeamColor.BLACK) ||
                 (name != null && name.endsWith("_OVER"));
+    }
+
+    private void broadcastToGame(int gameID, String message) {
+        for (Session s : SESSIONS.keySet()) {
+            ConnectionData data = SESSIONS.get(s);
+            if (data.gameID() == gameID && s.isOpen()) {
+                try {
+                    s.getRemote().sendString(message);
+                } catch (IOException ignored) {}
+            }
+        }
     }
 }
