@@ -250,6 +250,7 @@ public class WebSocketHandler {
             var game = gameData.game();
             if (game.isGameOver()) {
                 sendError(session, "Error: game is already over");
+                return;
             }
             game.setGameOver(true);
             GameData updatedGame = new GameData(
