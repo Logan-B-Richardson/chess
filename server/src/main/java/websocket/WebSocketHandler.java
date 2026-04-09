@@ -85,7 +85,16 @@ public class WebSocketHandler {
             sessions.put(session, new ConnectionData(username, gameID));
             LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.game());
             session.getRemote().sendString(gson.toJson(loadGameMessage));
-            System.out.println("handleConnect called for game " + gameID);
+            String role;
+            if (username.equals(gameData.whiteusername())) {
+                role = "as white";
+            } else if (username.equals(gameData.blackusername())) {
+                role = "as black";
+            } else {
+                role = "as an observer";
+            }
+            NotificationMessage note = new NotificationMessage(username + " connected " + role);
+            broadcast(gameID, gson.toJson(note), session);
         } catch (Exception e) {
             sendError(session, "Error: unable to connect to game");
         }
@@ -106,6 +115,10 @@ public class WebSocketHandler {
                 return;
             }
             var game = gameData.game();
+            if (game.isGameOver()) {
+                sendError(session, "Error: game is already over");
+                return;
+            }
             var move = command.getMove();
             String username = auth.username();
             boolean isWhite = username.equals(gameData.whiteusername());
@@ -121,6 +134,21 @@ public class WebSocketHandler {
             }
             try {
                 game.makeMove(move);
+                if (game.isInCheckmate(chess.ChessGame.TeamColor.WHITE) ||
+                        game.isInCheckmate(chess.ChessGame.TeamColor.BLACK)) {
+                    game.setGameOver(true);
+                    NotificationMessage note = new NotificationMessage("Checkmate!");
+                    broadcast(gameID, gson.toJson(note), null);
+                } else if (game.isInStalemate(chess.ChessGame.TeamColor.WHITE) ||
+                        game.isInStalemate(chess.ChessGame.TeamColor.BLACK)) {
+                    game.setGameOver(true);
+                    NotificationMessage note = new NotificationMessage("Stalemate!");
+                    broadcast(gameID, gson.toJson(note), null);
+                } else if (game.isInCheck(chess.ChessGame.TeamColor.WHITE) ||
+                        game.isInCheck(chess.ChessGame.TeamColor.BLACK)) {
+                    NotificationMessage note = new NotificationMessage("Check!");
+                    broadcast(gameID, gson.toJson(note), null);
+                }
             } catch (Exception e) {
                 sendError(session, "Error: illegal move");
                 return;
@@ -219,6 +247,16 @@ public class WebSocketHandler {
                 sendError(session, "Error: observers cannot resign");
                 return;
             }
+            var game = gameData.game();
+            game.setGameOver(true);
+            GameData updatedGame = new GameData(
+                    gameID,
+                    gameData.whiteusername(),
+                    gameData.blackusername(),
+                    gameData.gamename(),
+                    game
+            );
+            dao.updateGame(updatedGame);
             NotificationMessage note = new NotificationMessage(username + " resigned");
             String json = gson.toJson(note);
             for (Session s : sessions.keySet()) {
