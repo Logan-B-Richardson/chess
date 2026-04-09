@@ -174,21 +174,20 @@ public class MySqlDataAccess implements DataAccess{
     @Override
     public Collection<GameData> listGames() {
         String sql = """
-                SELECT gameID, whiteUsername, blackUsername, gameName, gameState
-                FROM game
-                """;
+            SELECT gameID, whiteUsername, blackUsername, gameName
+            FROM game
+            """;
         var games = new ArrayList<GameData>();
         try (var con = DatabaseManager.getConnection();
-            var ps = con.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery()) {
+             var ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                ChessGame game = gson.fromJson(rs.getString("gameState"), ChessGame.class);
                 games.add(new GameData(
                         rs.getInt("gameID"),
                         rs.getString("whiteUsername"),
                         rs.getString("blackUsername"),
                         rs.getString("gameName"),
-                        game
+                        null
                 ));
             }
         } catch (Exception e) {
