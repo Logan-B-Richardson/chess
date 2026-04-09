@@ -2,6 +2,10 @@ package client;
 
 import chess.ChessMove;
 import websocket.commands.MakeMoveCommand;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnError;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.CloseReason;
 
 import com.google.gson.Gson;
 import jakarta.websocket.ClientEndpoint;
@@ -15,22 +19,29 @@ import java.net.URI;
 @ClientEndpoint
 public class WebSocketFacade {
     private final Gson gson = new Gson();
+    private final String wsUrl;
     private Session session;
     private WebSocketListener listener;
 
-    public WebSocketFacade(WebSocketListener listener) {
+    public WebSocketFacade(String serverUrl, WebSocketListener listener) {
         this.listener = listener;
+        this.wsUrl = serverUrl.replaceFirst("^http", "ws") + "/ws";
     }
 
     public void connect(String authToken, int gameID) throws Exception {
         if (session != null && session.isOpen()) {
+            System.out.println("WebSocket already open.");
             return;
         }
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-        session = container.connectToServer(this, URI.create("ws://localhost:8080/ws"));
-        UserGameCommand connectCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
+        System.out.println("Connecting to " + wsUrl);
+        session = container.connectToServer(this, URI.create(wsUrl));
+        System.out.println("Session open after connect: " + session.isOpen());
+        UserGameCommand connectCommand =
+                new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
         String json = gson.toJson(connectCommand);
         session.getBasicRemote().sendText(json);
+        System.out.println("CONNECT sent.");
     }
 
     public void makeMove(String authToken, int gameID, ChessMove move) throws Exception {
@@ -40,6 +51,8 @@ public class WebSocketFacade {
         MakeMoveCommand command = new MakeMoveCommand(authToken, gameID, move);
         String json = gson.toJson(command);
         session.getBasicRemote().sendText(json);
+        System.out.println("About to send move. Session exists: " +
+                (session != null) + ", open: " + (session != null && session.isOpen()));
     }
 
     public void leave(String authToken, int gameID) throws Exception {
@@ -89,5 +102,25 @@ public class WebSocketFacade {
         } catch (Exception e) {
             System.out.println("Failed to parse WS message: " + message);
         }
+    }
+
+    @OnOpen
+    public void onOpen(Session session) {
+        System.out.println("WebSocket connected.");
+    }
+
+    @OnClose
+    public void onClose(Session session, CloseReason reason) {
+        System.out.println("WebSocket closed: " + reason);
+        this.session = null;
+    }
+
+    @OnError
+    public void onError(Session session, Throwable throwable) {
+        System.out.println("WebSocket error: " + throwable.getMessage());
+    }
+
+    public boolean isConnected() {
+        return session != null && session.isOpen();
     }
 }

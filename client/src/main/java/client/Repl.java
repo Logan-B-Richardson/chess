@@ -33,7 +33,7 @@ public class Repl {
 
     public Repl(String serverUrl) {
         this.server = new ServerFacade(serverUrl);
-        this.webSocketClient = new WebSocketFacade(new WebSocketListener() {
+        this.webSocketClient = new WebSocketFacade(serverUrl, new WebSocketListener() {
             @Override
             public void onLoadGame(ChessGame game) {
                 currentGame = game;
@@ -239,6 +239,10 @@ public class Repl {
                     ChessGame.TeamColor.BLACK :
                     ChessGame.TeamColor.WHITE;
             webSocketClient.connect(authToken, gameID);
+            if (!webSocketClient.isConnected()) {
+                System.out.println("Failed to connect websocket.");
+                return;
+            }
             inGameplay = true;
             System.out.println("Joined game. Waiting for server...");
         } catch (NumberFormatException e) {
@@ -267,8 +271,12 @@ public class Repl {
             observerMode = true;
             perspective = ChessGame.TeamColor.WHITE;
             webSocketClient.connect(authToken, gameID);
+            if (!webSocketClient.isConnected()) {
+                System.out.println("Failed to connect websocket.");
+                return;
+            }
             inGameplay = true;
-            System.out.println("Observing game. Waiting for server...");
+            System.out.println("Joined game. Waiting for server...");
         } catch (NumberFormatException e) {
             System.out.println("Game number must be a number.");
         } catch (Exception e) {
