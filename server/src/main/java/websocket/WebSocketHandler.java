@@ -115,10 +115,7 @@ public class WebSocketHandler {
                 return;
             }
             var game = gameData.game();
-            if (game.isInCheckmate(chess.ChessGame.TeamColor.WHITE) ||
-                    game.isInCheckmate(chess.ChessGame.TeamColor.BLACK) ||
-                    game.isInStalemate(chess.ChessGame.TeamColor.WHITE) ||
-                    game.isInStalemate(chess.ChessGame.TeamColor.BLACK)) {
+            if (isGameOver(gameData)) {
                 sendError(session, "Error: game is already over");
                 return;
             }
@@ -249,10 +246,7 @@ public class WebSocketHandler {
                 return;
             }
             var game = gameData.game();
-            if (game.isInCheckmate(chess.ChessGame.TeamColor.WHITE) ||
-                    game.isInCheckmate(chess.ChessGame.TeamColor.BLACK) ||
-                    game.isInStalemate(chess.ChessGame.TeamColor.WHITE) ||
-                    game.isInStalemate(chess.ChessGame.TeamColor.BLACK)) {
+            if (isGameOver(gameData)) {
                 sendError(session, "Error: game is already over");
                 return;
             }
@@ -260,7 +254,7 @@ public class WebSocketHandler {
                     gameID,
                     gameData.whiteusername(),
                     gameData.blackusername(),
-                    gameData.gamename(),
+                    gameData.gamename() + "_OVER",
                     game
             );
             dao.updateGame(updatedGame);
@@ -294,5 +288,15 @@ public class WebSocketHandler {
 
     private void removeSession(Session session) {
         sessions.remove(session);
+    }
+
+    private boolean isGameOver(GameData gameData) {
+        var game = gameData.game();
+        var name = gameData.gamename();
+        return game.isInCheckmate(chess.ChessGame.TeamColor.WHITE) ||
+                game.isInCheckmate(chess.ChessGame.TeamColor.BLACK) ||
+                game.isInStalemate(chess.ChessGame.TeamColor.WHITE) ||
+                game.isInStalemate(chess.ChessGame.TeamColor.BLACK) ||
+                (name != null && name.endsWith("_OVER"));
     }
 }
