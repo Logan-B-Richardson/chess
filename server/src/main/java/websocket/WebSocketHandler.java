@@ -50,7 +50,7 @@ public class WebSocketHandler {
     @OnWebSocketClose
     public void onClose(Session session, int statusCode, String reason) {
         removeSession(session);
-        System.out.println("Disconnected");
+        System.out.println("Disconnected. code=" + statusCode + ", reason=" + reason);
     }
 
     private void broadcast(int gameID, String message, Session exclude) {

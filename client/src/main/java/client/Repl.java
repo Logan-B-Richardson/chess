@@ -239,10 +239,6 @@ public class Repl {
                     ChessGame.TeamColor.BLACK :
                     ChessGame.TeamColor.WHITE;
             webSocketClient.connect(authToken, gameID);
-            if (!webSocketClient.isConnected()) {
-                System.out.println("Failed to connect websocket.");
-                return;
-            }
             inGameplay = true;
             System.out.println("Joined game. Waiting for server...");
         } catch (NumberFormatException e) {
@@ -271,10 +267,6 @@ public class Repl {
             observerMode = true;
             perspective = ChessGame.TeamColor.WHITE;
             webSocketClient.connect(authToken, gameID);
-            if (!webSocketClient.isConnected()) {
-                System.out.println("Failed to connect websocket.");
-                return;
-            }
             inGameplay = true;
             System.out.println("Joined game. Waiting for server...");
         } catch (NumberFormatException e) {

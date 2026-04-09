@@ -45,14 +45,14 @@ public class WebSocketFacade {
     }
 
     public void makeMove(String authToken, int gameID, ChessMove move) throws Exception {
+        System.out.println("Before move send: session=" + session +
+                ", open=" + (session != null && session.isOpen()));
         if (session == null || !session.isOpen()) {
             throw new IllegalStateException("WebSocket is not connected.");
         }
         MakeMoveCommand command = new MakeMoveCommand(authToken, gameID, move);
         String json = gson.toJson(command);
         session.getBasicRemote().sendText(json);
-        System.out.println("About to send move. Session exists: " +
-                (session != null) + ", open: " + (session != null && session.isOpen()));
     }
 
     public void leave(String authToken, int gameID) throws Exception {
