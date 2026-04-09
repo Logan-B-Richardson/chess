@@ -123,6 +123,7 @@ public class WebSocketFacade {
     public void onError(Session session, Throwable throwable) {
         System.out.println("WebSocket error: " + throwable.getMessage());
         this.session = null;
+        this.connectedGameID = -1;
     }
 
     public boolean isConnected() {

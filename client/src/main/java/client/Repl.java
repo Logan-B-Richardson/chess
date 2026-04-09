@@ -399,8 +399,14 @@ public class Repl {
                 promotionPiece = parsePromotionPiece(scanner.nextLine().trim());
             }
             ChessMove move = new ChessMove(start, end, promotionPiece);
-            ensureWebSocketConnected();
-            webSocketClient.makeMove(authToken, currentGameID, move);
+            try {
+                ensureWebSocketConnected();
+                webSocketClient.makeMove(authToken, currentGameID, move);
+            } catch (IllegalStateException e) {
+                System.out.println("Reconnecting websocket...");
+                webSocketClient.connect(authToken, currentGameID);
+                webSocketClient.makeMove(authToken, currentGameID, move);
+            }
         } catch (Exception e) {
             System.out.println(friendlyMessage(e));
         }
